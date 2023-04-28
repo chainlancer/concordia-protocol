@@ -1,5 +1,10 @@
 {
   "name": "hardhat-project",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "start": "yarn run build && node dist/index.js"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",
@@ -41,6 +46,8 @@
     "@chainlink/external-adapter": "^0.2.6",
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
+    "i": "^0.3.7",
+    "npm": "^9.6.5",
     "sha3": "^2.1.4"
   }
 }
