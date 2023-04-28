@@ -13,4 +13,4 @@ RUN yarn --frozen-lockfile
 
 COPY --chown=node:node . .
 
-CMD [ "node", "app.js" ]
+CMD [ "node", "dist/index.js" ]
