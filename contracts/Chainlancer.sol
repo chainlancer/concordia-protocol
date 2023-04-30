@@ -87,7 +87,7 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
         uint256 _fee,
         address _link
     ) ConfirmedOwner(msg.sender) {
-        // setChainlinkToken(_link);
+        setChainlinkToken(_link);
         ORACLE = _oracle;
         CHAINLINK_JOB = _jobId;
         CHAINLINK_FEE = _fee;

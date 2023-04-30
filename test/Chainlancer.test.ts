@@ -83,4 +83,22 @@ describe("Chainlancer", () => {
     // const agreement = await contract.workAgreements(1);
     // expect(agreement.verifierApproved).to.be.true;
   });
+
+  // it("it should allow the proprietor to update the decryption key", async () => {
+  //   await chainlancer
+  //     .connect(owner)
+  //     .createWorkAgreement(
+  //       "0x0000000000000000000000000000000000000000000000000000000000000001",
+  //       100,
+  //       await client.getAddress(),
+  //       await verifier.getAddress(),
+  //       "QmExampleCID"
+  //     );
+
+  //   await chainlancer.connect(verifier).approveWorkAgreement(1);
+
+  //   await chainlancer
+  //     .connect(owner)
+  //     .updateDecryptionKey(1, ethers.utils.formatBytes32String("0x1234"));
+  // });
 });

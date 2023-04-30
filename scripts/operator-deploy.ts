@@ -1,12 +1,12 @@
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import contractAddresses from "../src/contractAddresses";
+import addresses from "../src/addresses";
 
 const main = async () => {
   let [owner] = await ethers.getSigners();
 
   const network = hre.network.name;
-  const chainlinkTokenAddress = contractAddresses[network].chainlinkToken;
+  const chainlinkTokenAddress = addresses[network].chainlinkToken;
   if (!chainlinkTokenAddress)
     throw new Error(`no chainlink token address for network ${network}`);
 
