@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clr-ea-services
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clr-ea-services
+  template:
+    metadata:
+      labels:
+        app: clr-ea-services
+    spec:
+      containers:
+        - name: clr-ea-services
+          image: gcr.io/chainlancer-384913/clr-ea-services:0.0.1
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clr-ea-services
+spec:
+  selector:
+    app: clr-ea-services
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer

@@ -7,10 +7,16 @@
     "esModuleInterop": true
   },
   "include": [
-    "src/**/*",
-    "index.ts"
+    "./src",
+    "./scripts",
+    "index.ts",
+    "./test/Chainlancer.test.ts",
+    "src/types.d.ts"
   ],
   "exclude": [
     "node_modules"
+  ],
+  "files": [
+    "./hardhat.config.ts"
   ]
 }

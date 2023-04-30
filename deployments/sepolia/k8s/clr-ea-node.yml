@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clr-ea-node
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: clr-ea-node
+  template:
+    metadata:
+      labels:
+        app: clr-ea-node
+    spec:
+      initContainers:
+        - name: init
+          image: busybox:latest
+          command: ['sh', '-c', 'echo "rrossilli55@gmail.com" > /chainlink/.api; echo "AyloLucy5901!!!!" >> /chainlink/.api ; echo "AyloLucy5901!!!!" > /chainlink/.password']
+          envFrom:
+            - secretRef:
+                name: chainlink-secrets
+          volumeMounts:
+            - name: shared
+              mountPath: /chainlink
+      containers:
+        - name: clr-ea-node
+          image: smartcontract/chainlink:1.13.0-root
+          command:
+            ["chainlink","local", "n", "-p", "/chainlink/.password", "-a",  "/chainlink/.api"]
+          env:
+            - name: LOG_LEVEL
+              value: debug
+            - name: ETH_CHAIN_ID
+              value: "11155111"
+            - name: ETH_URL
+              value: wss://eth-sepolia.g.alchemy.com/v2/ZKG9vwIBS-DxJPeEVFCvJxOUORRkt-aG
+            - name: ETH_HTTP_URL
+              value: https://eth-sepolia.g.alchemy.com/v2/ZKG9vwIBS-DxJPeEVFCvJxOUORRkt-aG
+            - name: DATABASE_URL
+              value: postgresql://postgres:Ozq78ikzSK@clr-ea-postgresql:5432/postgres?sslmode=disable
+            - name: LINK_CONTRACT_ADDRESS
+              value: 0x779877A7B0D9E8603169DdbD7836e478b4624789
+            - name: CHAINLINK_TLS_PORT
+              value: "0"
+            - name: SECURE_COOKIES
+              value: "false"
+            - name: ALLOW_ORIGINS
+              value: "*"
+          ports:
+            - containerPort: 6688
+          volumeMounts:
+            - name: shared
+              mountPath: /chainlink
+          envFrom:
+            - secretRef:
+                name: chainlink-secrets
+      volumes:
+        - name: shared
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clr-ea-node
+spec:
+  selector:
+    app: clr-ea-node
+  ports:
+    - protocol: TCP
+      port: 6688
+      targetPort: 6688
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: chainlink-secrets
+type: Opaque
+stringData:
+  USER_EMAIL: rrossilli55@gmail.com
+  USER_PASSWORD: AyloLucy5901!!!!
+  WALLET_PASSWORD: AyloLucy5901!!!!
