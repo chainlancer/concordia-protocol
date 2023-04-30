@@ -15,3 +15,11 @@ $ kubectl run clr-ea-pg-postgresql-client --rm --tty -i --restart='Never' --name
 # connect from outside cluster
 $ kubectl port-forward --namespace default svc/clr-ea-pg-postgresql 5432:5432 & PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 543
 ```
+
+```bash
+
+$ npx hardhat run scripts/chainlancer-deploy.ts --network sepolia
+$ npx hardhat run scripts/chainlancer-create-work-agreement.ts --network sepolia
+$ npx hardhat run scripts/chainlancer-pay-work-agreement.ts --network sepolia
+$ npx hardhat run scripts/chainlancer-update-decryption-key.ts --network sepolia
+```

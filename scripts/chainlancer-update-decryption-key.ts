@@ -19,7 +19,7 @@ async function main() {
     chainlancerContractAddress
   );
 
-  const workAgreementID = "1";
+  const workAgreementID = "3";
   const decryptionKey = ethers.utils.formatBytes32String("0x1234");
   const tx = await contract
     .connect(signer)

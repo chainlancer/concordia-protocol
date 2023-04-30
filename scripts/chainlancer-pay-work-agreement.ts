@@ -19,7 +19,7 @@ async function main() {
     chainlancerContractAddress
   );
 
-  const workAgreementID = "1";
+  const workAgreementID = "3";
   const tx = await contract.connect(signer).payWorkAgreement(workAgreementID);
   console.log("Transaction sent, waiting for it to be mined...");
 

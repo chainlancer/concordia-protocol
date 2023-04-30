@@ -2,13 +2,15 @@ import { Requester, Validator } from "@chainlink/external-adapter";
 import { SHA3 } from "sha3";
 
 interface CustomParams {
-  cid: string[];
+  ipfs_cid: string[];
+  decryption_key: string[];
 }
 
 interface RequestInput {
   id: string;
   data: {
-    cid: string;
+    ipfs_cid: ArrayBuffer;
+    decryption_key: string;
   };
 }
 
@@ -18,7 +20,8 @@ const customError = (data: any): boolean => {
 };
 
 const customParams: CustomParams = {
-  cid: ["cid"],
+  ipfs_cid: ["ipfs_cid"],
+  decryption_key: ["decryption_key"],
 };
 
 export const createRequest = (
@@ -28,9 +31,12 @@ export const createRequest = (
   const validator = new Validator(callback, input, customParams);
   const jobRunID = validator.validated.id;
 
-  const cid = validator.validated.data.cid;
+  const ipfs_cid = validator.validated.data.ipfs_cid;
+  const decryption_key = validator.validated.data.decryption_key;
 
-  const url = `https://ipfs.io/ipfs/${cid}`;
+  // todo: some stuff with decryption_key
+
+  const url = `https://ipfs.io/ipfs/${ipfs_cid}`;
   const params = {};
 
   const config = {

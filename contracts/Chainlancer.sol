@@ -34,7 +34,7 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
         address payable verifier;
         bool paid;
         bool verifierApproved;
-        bytes32 decryptionKey;
+        bytes decryptionKey;
         string ipfsCID;
     }
 
@@ -44,7 +44,7 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
     // todo: cleanup
     struct TempData {
         uint256 workAgreementId;
-        bytes32 key;
+        bytes key;
     }
 
     // maps a Chainlink request ID to a tuple containing the work agreement ID and the decryption key. We chose to
@@ -74,7 +74,7 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
     );
     event DecryptionKeyUpdated(
         uint256 indexed workAgreementId,
-        bytes32 decryptionKey
+        bytes decryptionKey
     );
     event FundsWithdrawn(
         uint256 indexed workAgreementId,
@@ -188,7 +188,7 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
     // hashed and compared to the stored checksum. The key is accepted if the hashes match.
     function updateDecryptionKey(
         uint256 _workAgreementId,
-        bytes32 _decryptionKey
+        bytes memory _decryptionKey
     ) public {
         WorkAgreement storage agreement = workAgreements[_workAgreementId];
         require(
@@ -210,7 +210,8 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
         );
         require(agreement.paid, "Client has not paid");
         require(agreement.verifierApproved, "Verifier has not approved");
-        require(agreement.decryptionKey != "", "Decryption key not provided");
+        // todo:
+        // require(agreement.decryptionKey != "", "Decryption key not provided");
         uint256 amount = agreement.price;
         agreement.price = 0;
         agreement.proprietor.transfer(amount);
@@ -220,15 +221,14 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
     // Fetch the work hash from IPFS using Chainlink
     function fetchWorkHash(
         string memory ipfsCID,
-        bytes32 decryptionKey
+        bytes memory decryptionKey
     ) public onlyOwner returns (bytes32 requestId) {
         Chainlink.Request memory req = buildOperatorRequest(
             stringToBytes32(CHAINLINK_JOB),
             this.fulfillWorkHash.selector
         );
         req.add("ipfs_cid", ipfsCID);
-        // todo:
-        // req.addBytes("decryption_key", decryptionKey);
+        req.addBytes("decryption_key", decryptionKey);
         requestId = sendChainlinkRequestTo(ORACLE, req, CHAINLINK_FEE);
     }
 

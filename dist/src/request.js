@@ -9,13 +9,16 @@ const customError = (data) => {
     return false;
 };
 const customParams = {
-    cid: ["cid"],
+    ipfs_cid: ["ipfs_cid"],
+    decryption_key: ["decryption_key"],
 };
 const createRequest = (input, callback) => {
     const validator = new external_adapter_1.Validator(callback, input, customParams);
     const jobRunID = validator.validated.id;
-    const cid = validator.validated.data.cid;
-    const url = `https://ipfs.io/ipfs/${cid}`;
+    const ipfs_cid = validator.validated.data.ipfs_cid;
+    const decryption_key = validator.validated.data.decryption_key;
+    // todo: some stuff with decryption_key
+    const url = `https://ipfs.io/ipfs/${ipfs_cid}`;
     const params = {};
     const config = {
         url,
