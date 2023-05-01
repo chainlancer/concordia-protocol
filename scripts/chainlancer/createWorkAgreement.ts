@@ -2,7 +2,7 @@ import hre from "hardhat";
 import { ethers } from "hardhat";
 import addresses from "../../src/addresses";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getDeployedContract } from "../utils";
+import { getDeployedContract } from "../../src/utils";
 
 // function createWorkAgreement
 // bytes32 _checksum,
