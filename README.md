@@ -106,10 +106,21 @@ in order to integrate with Chainlink we need to deploy some services:
 
 _A Chainlink external adapter needs a Chainlink node to validate and process the data retrieved by the adapter. The node also handles job management and execution, which the adapter cannot perform alone._
 
+##### Deployment
+
 ```bash
 # deploy sepolia chainlink node
 $ kubectl apply -f deployments/sepolia/k8s/clr-ea-node.yml
 ```
+
+##### Interaction
+
+```bash
+# port forward
+$ kubectl port-forward service/clr-ea-node 6688:6688
+```
+
+navigate to http://localhost:6688/ in browser and sign in with secrets from k8s
 
 #### PostgreSQL
 
