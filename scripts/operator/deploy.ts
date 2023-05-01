@@ -1,6 +1,6 @@
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import addresses from "../src/addresses";
+import addresses from "../../src/addresses";
 
 const main = async () => {
   let [owner] = await ethers.getSigners();

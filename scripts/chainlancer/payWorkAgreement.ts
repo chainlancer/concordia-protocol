@@ -1,28 +1,26 @@
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import addresses from "../src/addresses";
+import addresses from "../../src/addresses";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getDeployedContract } from "./utils";
+import { getDeployedContract } from "../utils";
 
 async function main() {
   const signer = hre.ethers.provider.getSigner();
 
   const network = hre.network.name;
   const {
-    chainlinkOperator: operatorContractAddress,
+    chainlancer: chainlancerContractAddress,
     chainlinkNode: chainlinkNodeAddress,
   } = addresses[network];
 
   const contract = await getDeployedContract(
     hre,
-    "Operator",
-    operatorContractAddress
+    "Chainlancer",
+    chainlancerContractAddress
   );
-  console.log(chainlinkNodeAddress);
 
-  const tx = await contract
-    .connect(signer)
-    .setAuthorizedSenders(chainlinkNodeAddress);
+  const workAgreementID = "3";
+  const tx = await contract.connect(signer).payWorkAgreement(workAgreementID);
   console.log("Transaction sent, waiting for it to be mined...");
 
   const receipt = await tx.wait();
