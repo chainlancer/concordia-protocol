@@ -16,7 +16,7 @@ install-dependencies:
 # develop
 
 build:
-	tsc build
+	tsc
 
 dev:
 	make build
@@ -47,6 +47,15 @@ docker-push:
 
 docker-run:
 	@docker run -itp $(port):$(port)  $(gcr-image)
+
+# kubernetes
+
+k8s-deploy-sepolia:
+	kubectl apply -f deployments/sepolia/k8s/clr-ea-services.yml
+
+k8s-deploy-mainnet:
+	# kubectl apply -f deployments/mainnet/k8s/clr-ea-services.yml
+	echo "TODO"
 
 # docker-compose
 

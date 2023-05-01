@@ -141,17 +141,20 @@ _the external adapter is an API service that fetches work bundles from IPFS, dec
 _ci/cd coming soon_
 
 ```bash
+# build (ignore build error)
+$ make build
+
 # bump version
 $ make bumpversion-patch
 
 # build image
-$ docker build . -t gcr.io/chainlancer-384913/clr-ea-services:<VERSION>
+$ make docker-build
 
 # push image to gcr
-$ docker build . -t gcr.io/chainlancer-384913/clr-ea-services:<VERSION>
+$ make docker-push
 
 # deploy ea service
-$ kubectl apply -f deployments/sepolia/k8s/clr-ea-services.yml
+$ make k8s-deploy-sepolia
 ```
 
 ##### Interaction
