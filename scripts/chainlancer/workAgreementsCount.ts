@@ -4,11 +4,9 @@ import config from "../../src/config";
 import { getDeployedContract } from "../../src/utils";
 
 // params
-const workAgreementID = "3";
+const WORK_AGREEMENT_ID = "3";
 
 async function main() {
-  const signer = hre.ethers.provider.getSigner();
-
   const { chainlancerAddress } = config[hre.network.name];
 
   const contract = await getDeployedContract(

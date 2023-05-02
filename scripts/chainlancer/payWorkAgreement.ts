@@ -3,7 +3,7 @@ import config from "../../src/config";
 import { getDeployedContract } from "../../src/utils";
 
 // params
-const workAgreementID = "3";
+const WORK_AGREEMENT_ID = "1";
 
 async function main() {
   const signer = hre.ethers.provider.getSigner();
@@ -16,7 +16,7 @@ async function main() {
     chainlancerAddress
   );
 
-  const tx = await contract.connect(signer).payWorkAgreement(workAgreementID);
+  const tx = await contract.connect(signer).payWorkAgreement(WORK_AGREEMENT_ID);
   console.log("Transaction sent, waiting for it to be mined...");
 
   const receipt = await tx.wait();

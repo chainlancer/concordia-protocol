@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/Cellar/yarn/1.22.19/libexec/bin/yarn.js add @types/chainlink__external-adapter
+  /usr/local/bin/node /usr/local/Cellar/yarn/1.22.19/libexec/bin/yarn.js add --dev @alchemy-eth/web3
 
 PATH: 
   /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/robertrossilli/.cargo/bin:/usr/local/opt/fzf/bin
@@ -14,7 +14,7 @@ Platform:
   darwin x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@types%2fchainlink__external-adapter: Not found
+  Error: https://registry.yarnpkg.com/@alchemy-eth%2fweb3: Not found
       at params.callback [as _callback] (/usr/local/Cellar/yarn/1.22.19/libexec/lib/cli.js:66145:18)
       at self.callback (/usr/local/Cellar/yarn/1.22.19/libexec/lib/cli.js:140890:22)
       at Request.emit (node:events:513:28)
@@ -29,7 +29,11 @@ Trace:
 npm manifest: 
   {
     "name": "hardhat-project",
-    "type": "module",
+    "type": "commonjs",
+    "scripts": {
+      "build": "tsc",
+      "start": "yarn run build && node dist/index.js"
+    },
     "devDependencies": {
       "@nomiclabs/hardhat-ethers": "^2.0.6",
       "@nomiclabs/hardhat-etherscan": "^3.1.0",

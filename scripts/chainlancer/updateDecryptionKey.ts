@@ -4,8 +4,8 @@ import config from "../../src/config";
 import { getDeployedContract } from "../../src/utils";
 
 // params
-const workAgreementID = "3";
-const decryptionKey = "0x1234";
+const WORK_AGREEMENT_ID = "3";
+const DECRYPTION_KEY = "0x1234";
 
 async function main() {
   const signer = hre.ethers.provider.getSigner();
@@ -21,8 +21,8 @@ async function main() {
   const tx = await contract
     .connect(signer)
     .updateDecryptionKey(
-      workAgreementID,
-      ethers.utils.formatBytes32String(decryptionKey)
+      WORK_AGREEMENT_ID,
+      ethers.utils.formatBytes32String(DECRYPTION_KEY)
     );
   console.log("Transaction sent, waiting for it to be mined...");
 

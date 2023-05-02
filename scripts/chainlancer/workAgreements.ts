@@ -4,7 +4,7 @@ import config from "../../src/config";
 import { getDeployedContract } from "../../src/utils";
 
 // params
-const workAgreementID = "1";
+const WORK_AGREEMENT_ID = "1";
 
 async function main() {
   const signer = hre.ethers.provider.getSigner();
@@ -19,7 +19,7 @@ async function main() {
 
   const workAgreement = await contract
     .connect(signer)
-    .workAgreements(workAgreementID);
+    .workAgreements(WORK_AGREEMENT_ID);
   console.log("work agreement: ", workAgreement);
 }
 

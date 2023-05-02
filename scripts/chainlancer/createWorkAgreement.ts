@@ -5,10 +5,10 @@ import { getDeployedContract } from "../../src/utils";
 import { WorkAgreementCreate } from "../../src/models";
 
 // params
-const price = "0.0";
-const verifier = "0x0000000000000000000000000000000000000000";
-const ipfsCID = "QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi";
-const checksum = "0x1234";
+const PRICE = "0.0";
+const VERIFIER = "0x0000000000000000000000000000000000000000";
+const IPFSCID = "QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi";
+const CHECKSUM = "0x1234";
 
 async function main() {
   const signer = hre.ethers.provider.getSigner();
@@ -22,11 +22,11 @@ async function main() {
   );
 
   const workAgreement: WorkAgreementCreate = {
-    checksum: ethers.utils.formatBytes32String(checksum),
-    price: ethers.utils.parseEther(price),
+    checksum: ethers.utils.formatBytes32String(CHECKSUM),
+    price: ethers.utils.parseEther(PRICE),
     client: await signer.getAddress(),
-    verifier,
-    ipfsCID,
+    verifier: VERIFIER,
+    ipfsCID: IPFSCID,
   };
 
   const tx = await contract

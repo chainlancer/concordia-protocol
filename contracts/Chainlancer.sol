@@ -72,9 +72,13 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
         uint256 indexed workAgreementId,
         address indexed verifier
     );
-    event DecryptionKeyUpdated(
+    event WorkAgreementDecryptionKeyUpdated(
         uint256 indexed workAgreementId,
         string decryptionKey
+    );
+    event WorkAgreementDecryptionKeyUpdateFailed(
+        uint256 indexed workAgreementId,
+        string invalidDecryptionKey
     );
     event FundsWithdrawn(
         uint256 indexed workAgreementId,
@@ -257,9 +261,14 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
         ];
         if (agreement.checksum == _hash) {
             agreement.decryptionKey = tempData.key;
-            emit DecryptionKeyUpdated(
+            emit WorkAgreementDecryptionKeyUpdated(
                 tempData.workAgreementId,
                 agreement.decryptionKey
+            );
+        } else {
+            emit WorkAgreementDecryptionKeyUpdateFailed(
+                tempData.workAgreementId,
+                tempData.key
             );
         }
         delete requestIdToTempData[_requestId];
