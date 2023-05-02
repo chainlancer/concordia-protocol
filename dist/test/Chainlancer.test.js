@@ -8,66 +8,69 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const hardhat_1 = require("hardhat");
+const hardhat_1 = __importDefault(require("hardhat"));
+const hardhat_2 = require("hardhat");
 const chai_1 = require("chai");
+const addresses_1 = __importDefault(require("../src/addresses"));
+const utils_1 = require("../src/utils");
 describe("Chainlancer", () => {
-    let chainlancer;
+    let chainlancerContract;
     let owner;
     let client;
-    let verifier;
-    //   let others: Signer[];
+    let verifier = "0x0000000000000000000000000000000000000000";
+    let workAgreementID;
+    const { chainlancer } = addresses_1.default[hardhat_1.default.network.name];
+    // test params
+    const ipfsCID = "QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi";
+    const agreementChecksum = hardhat_2.ethers.utils.formatBytes32String("0x1234");
+    const agreementPrice = hardhat_2.ethers.utils.parseEther("0.0");
+    const agreementDecryptionKey = hardhat_2.ethers.utils.formatBytes32String("0x1234");
     beforeEach(() => __awaiter(void 0, void 0, void 0, function* () {
-        [owner, client, verifier] = yield hardhat_1.ethers.getSigners();
-        // const LinkTokenFactory = new ChainlinkToken
-        // const linkToken = await LinkTokenFactory.deploy(10000000);
-        const ownerAddress = yield owner.getAddress();
-        const OperatorFactory = yield hardhat_1.ethers.getContractFactory("Operator");
-        const operator = yield OperatorFactory.deploy(ownerAddress, ownerAddress);
-        const ChainlancerFactory = yield hardhat_1.ethers.getContractFactory("Chainlancer");
-        chainlancer = yield ChainlancerFactory.deploy(operator.address, "c6d0b1b86b6d40d890a31bfa8bd50c7c", 0, operator.address // todo: replace with chainlink token address
-        );
+        [owner, client] = yield hardhat_2.ethers.getSigners();
+        chainlancerContract = yield (0, utils_1.getDeployedContract)(hardhat_1.default, "Chainlancer", chainlancer);
     }));
-    it("should create a work agreement", () => __awaiter(void 0, void 0, void 0, function* () {
-        yield chainlancer
+    it("create work agreement", () => __awaiter(void 0, void 0, void 0, function* () {
+        // create work agreement
+        let tx = yield chainlancerContract
             .connect(owner)
-            .createWorkAgreement("0x0000000000000000000000000000000000000000000000000000000000000001", 100, yield client.getAddress(), yield verifier.getAddress(), "QmExampleCID");
-        const agreement = yield chainlancer.workAgreements(1);
-        (0, chai_1.expect)(agreement.checksum).to.equal("0x0000000000000000000000000000000000000000000000000000000000000001");
-        (0, chai_1.expect)(agreement.price).to.equal(100);
+            .createWorkAgreement(agreementChecksum, agreementPrice, yield owner.getAddress(), verifier, ipfsCID);
+        let res = yield tx.wait();
+        console.log(res.events);
+        // get id of created work agreement
+        const workAgreementCount = yield chainlancerContract.workAgreementCount();
+        workAgreementID = workAgreementCount.toNumber() - 1;
+        let agreement = yield chainlancerContract.workAgreements(workAgreementID);
+        (0, chai_1.expect)(agreement.checksum).to.equal(agreementChecksum);
+        (0, chai_1.expect)(agreement.price).to.equal(agreementPrice);
         (0, chai_1.expect)(agreement.proprietor).to.equal(yield owner.getAddress());
-        (0, chai_1.expect)(agreement.client).to.equal(yield client.getAddress());
-        (0, chai_1.expect)(agreement.verifier).to.equal(yield verifier.getAddress());
+        (0, chai_1.expect)(agreement.client).to.equal(yield owner.getAddress());
+        (0, chai_1.expect)(agreement.verifier).to.equal(verifier);
     }));
-    it("should allow anyone to pay for a work agreement", () => __awaiter(void 0, void 0, void 0, function* () {
-        yield chainlancer
+    // todo: approve work agreement
+    it("pay for new work agreement", () => __awaiter(void 0, void 0, void 0, function* () {
+        let agreement = yield chainlancerContract.workAgreements(workAgreementID);
+        (0, chai_1.expect)(agreement.checksum).to.equal(agreementChecksum);
+        (0, chai_1.expect)(agreement.price).to.equal(agreementPrice);
+        (0, chai_1.expect)(agreement.proprietor).to.equal(yield owner.getAddress());
+        (0, chai_1.expect)(agreement.client).to.equal(yield owner.getAddress());
+        (0, chai_1.expect)(agreement.verifier).to.equal(verifier);
+        // pay work agreement
+        let tx = yield chainlancerContract
             .connect(owner)
-            .createWorkAgreement("0x0000000000000000000000000000000000000000000000000000000000000001", 100, yield client.getAddress(), yield verifier.getAddress(), "QmExampleCID");
-        yield chainlancer.connect(client).payWorkAgreement(1, { value: 100 });
-        // const agreement = await contract.workAgreements(1);
-        // expect(agreement.paid).to.be.true;
+            .payWorkAgreement(workAgreementID, { value: agreementPrice });
+        let res = yield tx.wait();
+        console.log(res.events);
+        agreement = yield chainlancerContract.workAgreements(workAgreementID);
+        (0, chai_1.expect)(agreement.paid).to.equal(true);
     }));
-    it("should allow the verifier to approve a work agreement", () => __awaiter(void 0, void 0, void 0, function* () {
-        yield chainlancer
+    it("update decryption key for new work agreement", () => __awaiter(void 0, void 0, void 0, function* () {
+        let res = yield chainlancerContract
             .connect(owner)
-            .createWorkAgreement("0x0000000000000000000000000000000000000000000000000000000000000001", 100, yield client.getAddress(), yield verifier.getAddress(), "QmExampleCID");
-        yield chainlancer.connect(verifier).approveWorkAgreement(1);
-        // const agreement = await contract.workAgreements(1);
-        // expect(agreement.verifierApproved).to.be.true;
+            .updateDecryptionKey(workAgreementID, agreementDecryptionKey);
+        console.log(res.events);
     }));
-    // it("it should allow the proprietor to update the decryption key", async () => {
-    //   await chainlancer
-    //     .connect(owner)
-    //     .createWorkAgreement(
-    //       "0x0000000000000000000000000000000000000000000000000000000000000001",
-    //       100,
-    //       await client.getAddress(),
-    //       await verifier.getAddress(),
-    //       "QmExampleCID"
-    //     );
-    //   await chainlancer.connect(verifier).approveWorkAgreement(1);
-    //   await chainlancer
-    //     .connect(owner)
-    //     .updateDecryptionKey(1, ethers.utils.formatBytes32String("0x1234"));
-    // });
 });

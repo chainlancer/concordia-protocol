@@ -13,7 +13,7 @@ observationSource = """
                   topics="$(jobRun.logTopics)"]
 
     decode_cbor  [type=cborparse data="$(decode_log.data)"]
-    fetch        [type=bridge name="clr-ea-v0" requestData="{\\"id\\": $(jobSpec.externalJobID), \\"data\\": { \\"ipfs_cid\\": $(decode_cbor.ipfs_cid), \\"decryption_key\\": $(decode_cbor.decryption_key) }}"]
+    fetch        [type=bridge name="clr-ea-v0" requestData="{\\"id\\": $(jobSpec.externalJobID), \\"data\\": { \\"ipfs_cid\\": $(decode_cbor.ipfs_cid), \\"decryption_key\\": \\"0x$(decode_cbor.decryption_key)\\" }}"]
     parse        [type=jsonparse path="data,result" data="$(fetch)"]
     encode_data  [type=ethabiencode abi="(bytes32 requestId,string info)" data="{\\"requestId\\": $(decode_log.requestId),\\"info\\": $(parse) }"]
     encode_tx    [type=ethabiencode

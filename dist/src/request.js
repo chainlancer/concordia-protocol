@@ -17,6 +17,9 @@ const createRequest = (input, callback) => {
     const jobRunID = validator.validated.id;
     const ipfs_cid = validator.validated.data.ipfs_cid;
     const decryption_key = validator.validated.data.decryption_key;
+    console.log("-----------------------");
+    console.log(ipfs_cid, decryption_key);
+    console.log("-----------------------");
     // todo: some stuff with decryption_key
     const url = `https://ipfs.io/ipfs/${ipfs_cid}`;
     const params = {};

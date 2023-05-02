@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const hardhat_1 = __importDefault(require("hardhat"));
 const hardhat_2 = require("hardhat");
 const addresses_1 = __importDefault(require("../../src/addresses"));
-const utils_1 = require("../utils");
+const utils_1 = require("../../src/utils");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const signer = hardhat_1.default.ethers.provider.getSigner();

@@ -6,10 +6,10 @@ interface CustomParams {
   decryption_key: string[];
 }
 
-interface RequestInput {
+export interface RequestInput {
   id: string;
   data: {
-    ipfs_cid: ArrayBuffer;
+    ipfs_cid: string;
     decryption_key: string;
   };
 }
@@ -33,6 +33,10 @@ export const createRequest = (
 
   const ipfs_cid = validator.validated.data.ipfs_cid;
   const decryption_key = validator.validated.data.decryption_key;
+
+  console.log("-----------------------");
+  console.log(ipfs_cid, decryption_key);
+  console.log("-----------------------");
 
   // todo: some stuff with decryption_key
 

@@ -47,9 +47,11 @@ describe("Chainlancer", () => {
 
     // get id of created work agreement
     const workAgreementCount = await chainlancerContract.workAgreementCount();
-    workAgreementID = workAgreementCount.toNumber() - 1;
+    workAgreementID = workAgreementCount.toNumber();
+    console.log("work agreement id: ", workAgreementID);
 
-    let agreement = await chainlancerContract.workAgreements(workAgreementID);
+    const agreement = await chainlancerContract.workAgreements(workAgreementID);
+    console.log("work agreement: ", agreement);
     expect(agreement.checksum).to.equal(agreementChecksum);
     expect(agreement.price).to.equal(agreementPrice);
     expect(agreement.proprietor).to.equal(await owner.getAddress());
@@ -60,13 +62,6 @@ describe("Chainlancer", () => {
   // todo: approve work agreement
 
   it("pay for new work agreement", async () => {
-    let agreement = await chainlancerContract.workAgreements(workAgreementID);
-    expect(agreement.checksum).to.equal(agreementChecksum);
-    expect(agreement.price).to.equal(agreementPrice);
-    expect(agreement.proprietor).to.equal(await owner.getAddress());
-    expect(agreement.client).to.equal(await owner.getAddress());
-    expect(agreement.verifier).to.equal(verifier);
-
     // pay work agreement
     let tx = await chainlancerContract
       .connect(owner)
@@ -74,14 +69,19 @@ describe("Chainlancer", () => {
     let res = await tx.wait();
     console.log(res.events);
 
-    agreement = await chainlancerContract.workAgreements(workAgreementID);
+    const agreement = await chainlancerContract.workAgreements(workAgreementID);
     expect(agreement.paid).to.equal(true);
   });
 
   it("update decryption key for new work agreement", async () => {
-    let res = await chainlancerContract
+    const workAgreementCount = await chainlancerContract.workAgreementCount();
+    workAgreementID = workAgreementCount.toNumber();
+
+    let tx = await chainlancerContract
       .connect(owner)
       .updateDecryptionKey(workAgreementID, agreementDecryptionKey);
+
+    let res = await tx.wait();
     console.log(res.events);
   });
 });

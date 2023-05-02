@@ -40,6 +40,9 @@ dotenv.config();
 // }
 
 const config: HardhatUserConfig = {
+  mocha: {
+    timeout: 1000000,
+  },
   solidity: {
     compilers: [
       {

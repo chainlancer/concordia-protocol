@@ -1,5 +1,5 @@
-service := clr-ea-service
-version := 0.0.3
+service := clr-ea-services
+version := 0.0.8
 gcloud_proj_id := chainlancer-384913
 cluster := chainlancer
 gcr-image := gcr.io/${gcloud_proj_id}/${service}:${version}
@@ -56,6 +56,12 @@ k8s-deploy-sepolia:
 k8s-deploy-mainnet:
 	# kubectl apply -f deployments/mainnet/k8s/clr-ea-services.yml
 	echo "TODO"
+
+k8s-build-push-deploy-sepolia:
+	make bumpversion-patch
+	make docker-build
+	make docker-push
+	make k8s-deploy-sepolia
 
 # docker-compose
 
