@@ -6,7 +6,7 @@ import {
   CHAINLINK_TOKEN_ADDRESS_SEPOLIA,
 } from "./consts";
 
-const config: Record<string, Record<string, string>> = {
+const config: any = {
   sepolia: {
     chainlinkTokenAddress: CHAINLINK_TOKEN_ADDRESS_SEPOLIA,
     chainlinkNodeAddress: CHAINLINK_NODE_ADDRESS_SEPOLIA,

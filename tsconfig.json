@@ -8,10 +8,11 @@
   },
   "include": [
     "./src",
-    "./scripts",
+    "tasks",
     "index.ts",
     "./test/Chainlancer.test.ts",
-    "src/types.d.ts"
+    "src/types.d.ts",
+    "tasks/fetchEvents.ts"
   ],
   "exclude": [
     "node_modules"

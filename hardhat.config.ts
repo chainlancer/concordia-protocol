@@ -6,39 +6,10 @@ import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
-// import { HardhatUserConfig } from "hardhat/config";
 import "solidity-coverage";
-import {
-  HardhatUserConfig,
-  HardhatNetworkUserConfig,
-  HttpNetworkUserConfig,
-  NetworksUserConfig,
-} from "hardhat/types";
+import { HardhatUserConfig } from "hardhat/types";
 
 dotenv.config();
-
-// // Extend the Hardhat config so that we can add the chainlinkTokenAddress
-// type ExtendedHardhatNetworkUserConfig = HardhatNetworkUserConfig & {
-//   chainlinkTokenAddress?: string;
-// };
-
-// type ExtendedHttpNetworkUserConfig = HttpNetworkUserConfig & {
-//   chainlinkTokenAddress?: string;
-// };
-
-// type ExtendedNetworkUserConfig =
-//   | ExtendedHardhatNetworkUserConfig
-//   | ExtendedHttpNetworkUserConfig;
-
-// interface ExtendedNetworksUserConfig extends NetworksUserConfig {
-//   hardhat?: ExtendedHardhatNetworkUserConfig;
-//   [networkName: string]: ExtendedNetworkUserConfig | undefined;
-// }
-
-// interface ExtendedHardhatUserConfig extends HardhatUserConfig {
-//   networks: ExtendedNetworksUserConfig;
-// }
-
 const config: HardhatUserConfig = {
   mocha: {
     timeout: 1000000,
@@ -90,5 +61,19 @@ const config: HardhatUserConfig = {
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
+
+// TODO: is there a less tedious way to import these tasks?
+// import "./tasks/chainlancer/createWorkAgreement";
+import "./tasks/chainlancer/fetchEvents";
+import "./tasks/chainlancer/payWorkAgreement";
+import "./tasks/chainlancer/updateDecryptionKey";
+import "./tasks/chainlancer/workAgreements";
+import "./tasks/chainlancer/workAgreementsCount";
+import "./tasks/operator/setAuthorizedSenders";
+
+// TODO: these tasks are not importable because they reference "ethers" which is
+// not available in the tasks/ folder.  This is a limitation of the hardhat tasks
+// import "./tasks/chainlancer/deploy";
+// import "./tasks/operator/deploy";
 
 export default config;

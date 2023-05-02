@@ -1,12 +1,16 @@
-import hre from "hardhat";
 import { ethers } from "hardhat";
 import config from "../../src/config";
+import { task } from "hardhat/config";
+import { CHAINLANCER } from "./consts";
 
-const main = async () => {
+// TODO: this task is not importable because it references "ethers" which is not
+// available in the tasks/ folder.  This is a limitation of the hardhat tasks
+task("deploy", "Deploy Chainlancer Contract").setAction(async (args, hre) => {
   const { chainlinkTokenAddress, chainlinkOperatorAddress, chainlinkJobID } =
     config[hre.network.name];
 
-  const ChainlancerFactory = await ethers.getContractFactory("Chainlancer");
+  const ChainlancerFactory = await ethers.getContractFactory(CHAINLANCER);
+
   const chainlancer = await ChainlancerFactory.deploy(
     chainlinkOperatorAddress,
     chainlinkJobID,
@@ -15,16 +19,8 @@ const main = async () => {
   );
 
   await chainlancer.deployed();
-
   console.log("===============================");
   console.log("Chainlancer Addr: ", chainlancer.address);
   console.log("===============================");
   console.log("owner", await chainlancer.owner());
-};
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
 });
-
-export default {};
