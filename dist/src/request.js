@@ -9,15 +9,20 @@ const customError = (data) => {
     return false;
 };
 const customParams = {
-    ipfs_cid: ["ipfs_cid"],
     decryption_key: ["decryption_key"],
+    ipfs_cid: ["ipfs_cid"],
 };
 const createRequest = (input, callback) => {
-    const validator = new external_adapter_1.Validator(callback, input, customParams);
-    const jobRunID = validator.validated.id;
-    const ipfs_cid = validator.validated.data.ipfs_cid;
-    const decryption_key = validator.validated.data.decryption_key;
+    // const validator = new Validator(callback, input, customParams);
+    // const jobRunID = validator.validated.id;
+    // const ipfs_cid = validator.validated.data.ipfs_cid;
+    // const decryption_key = validator.validated.data.decryption_key;
+    console.log("input:");
+    console.log(input);
+    const jobRunID = input.id;
+    const { ipfs_cid, decryption_key } = input.data;
     console.log("-----------------------");
+    console.log("ipfs_cid, decryption_key:");
     console.log(ipfs_cid, decryption_key);
     console.log("-----------------------");
     // todo: some stuff with decryption_key

@@ -5,7 +5,6 @@ import { getDeployedContract } from "../../src/utils";
 
 // params
 const workAgreementID = "3";
-const decryptionKey = "0x1234";
 
 async function main() {
   const signer = hre.ethers.provider.getSigner();
@@ -18,16 +17,8 @@ async function main() {
     chainlancerAddress
   );
 
-  const tx = await contract
-    .connect(signer)
-    .updateDecryptionKey(
-      workAgreementID,
-      ethers.utils.formatBytes32String(decryptionKey)
-    );
-  console.log("Transaction sent, waiting for it to be mined...");
-
-  const receipt = await tx.wait();
-  console.log("Transaction mined:", receipt.transactionHash);
+  const workAgreementCount = await contract.workAgreementCount();
+  console.log("work agreement count: ", workAgreementCount.toNumber());
 }
 
 main()

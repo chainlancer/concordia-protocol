@@ -51,6 +51,9 @@ dotenv.config();
 //   networks: ExtendedNetworksUserConfig;
 // }
 const config = {
+    mocha: {
+        timeout: 1000000,
+    },
     solidity: {
         compilers: [
             {

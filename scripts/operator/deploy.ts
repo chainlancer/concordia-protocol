@@ -1,14 +1,11 @@
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import addresses from "../../src/addresses";
+import config from "../../src/config";
 
 const main = async () => {
   let [owner] = await ethers.getSigners();
 
-  const network = hre.network.name;
-  const chainlinkTokenAddress = addresses[network].chainlinkToken;
-  if (!chainlinkTokenAddress)
-    throw new Error(`no chainlink token address for network ${network}`);
+  const { chainlinkTokenAddress } = config[hre.network.name];
 
   const OperatorFactory = await ethers.getContractFactory("Operator");
   const operator = await OperatorFactory.deploy(

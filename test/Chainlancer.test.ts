@@ -2,7 +2,7 @@ import hre from "hardhat";
 import { ethers } from "hardhat";
 import { Contract, Signer } from "ethers";
 import { expect } from "chai";
-import addresses from "../src/addresses";
+import config from "../src/config";
 import { getDeployedContract } from "../src/utils";
 
 describe("Chainlancer", () => {
@@ -12,13 +12,14 @@ describe("Chainlancer", () => {
   let verifier = "0x0000000000000000000000000000000000000000";
   let workAgreementID: any;
 
-  const { chainlancer } = addresses[hre.network.name];
+  const { chainlancerAddress } = config[hre.network.name];
 
   // test params
   const ipfsCID = "QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi";
   const agreementChecksum = ethers.utils.formatBytes32String("0x1234");
   const agreementPrice = ethers.utils.parseEther("0.0");
-  const agreementDecryptionKey = ethers.utils.formatBytes32String("0x1234");
+  // const agreementDecryptionKey = ethers.utils.formatBytes32String("0x1234");
+  const agreementDecryptionKey = "1234567890";
 
   beforeEach(async () => {
     [owner, client] = await ethers.getSigners();
@@ -26,7 +27,7 @@ describe("Chainlancer", () => {
     chainlancerContract = await getDeployedContract(
       hre,
       "Chainlancer",
-      chainlancer
+      chainlancerAddress
     );
   });
 
@@ -52,6 +53,7 @@ describe("Chainlancer", () => {
 
     const agreement = await chainlancerContract.workAgreements(workAgreementID);
     console.log("work agreement: ", agreement);
+
     expect(agreement.checksum).to.equal(agreementChecksum);
     expect(agreement.price).to.equal(agreementPrice);
     expect(agreement.proprietor).to.equal(await owner.getAddress());

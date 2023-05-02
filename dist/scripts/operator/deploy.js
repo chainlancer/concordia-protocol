@@ -14,13 +14,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const hardhat_1 = __importDefault(require("hardhat"));
 const hardhat_2 = require("hardhat");
-const addresses_1 = __importDefault(require("../../src/addresses"));
+const config_1 = __importDefault(require("../../src/config"));
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     let [owner] = yield hardhat_2.ethers.getSigners();
-    const network = hardhat_1.default.network.name;
-    const chainlinkTokenAddress = addresses_1.default[network].chainlinkToken;
-    if (!chainlinkTokenAddress)
-        throw new Error(`no chainlink token address for network ${network}`);
+    const { chainlinkTokenAddress } = config_1.default[hardhat_1.default.network.name];
     const OperatorFactory = yield hardhat_2.ethers.getContractFactory("Operator");
     const operator = yield OperatorFactory.deploy(chainlinkTokenAddress, owner.address);
     yield operator.deployed();

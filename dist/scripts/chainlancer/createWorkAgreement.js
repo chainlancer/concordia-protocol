@@ -14,28 +14,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const hardhat_1 = __importDefault(require("hardhat"));
 const hardhat_2 = require("hardhat");
-const addresses_1 = __importDefault(require("../../src/addresses"));
+const config_1 = __importDefault(require("../../src/config"));
 const utils_1 = require("../../src/utils");
-// function createWorkAgreement
-// bytes32 _checksum,
-// uint256 _price,
-// address payable _client,
-// address payable _verifier,
-// string memory _ipfsCID
+// params
+const price = "0.0";
+const verifier = "0x0000000000000000000000000000000000000000";
+const ipfsCID = "QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi";
+const checksum = "0x1234";
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const signer = hardhat_1.default.ethers.provider.getSigner();
-        const network = hardhat_1.default.network.name;
-        const { chainlancer: chainlancerContractAddress, chainlinkNode: chainlinkNodeAddress, } = addresses_1.default[network];
-        const contract = yield (0, utils_1.getDeployedContract)(hardhat_1.default, "Chainlancer", chainlancerContractAddress);
-        const checksum = hardhat_2.ethers.utils.formatBytes32String("0x1234");
-        const price = hardhat_2.ethers.utils.parseEther("0.0");
-        const client = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-        const verifier = "0x0000000000000000000000000000000000000000";
-        const cid = "QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi";
+        const { chainlancerAddress } = config_1.default[hardhat_1.default.network.name];
+        const contract = yield (0, utils_1.getDeployedContract)(hardhat_1.default, "Chainlancer", chainlancerAddress);
+        const workAgreement = {
+            checksum: hardhat_2.ethers.utils.formatBytes32String(checksum),
+            price: hardhat_2.ethers.utils.parseEther(price),
+            client: yield signer.getAddress(),
+            verifier,
+            ipfsCID,
+        };
         const tx = yield contract
             .connect(signer)
-            .createWorkAgreement(checksum, price, client, verifier, cid);
+            .createWorkAgreement(workAgreement.checksum, workAgreement.price, workAgreement.client, workAgreement.verifier, workAgreement.ipfsCID);
         console.log("Transaction sent, waiting for it to be mined...");
         const receipt = yield tx.wait();
         console.log("Transaction mined:", receipt.transactionHash);

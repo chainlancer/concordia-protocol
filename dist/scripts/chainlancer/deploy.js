@@ -14,13 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const hardhat_1 = __importDefault(require("hardhat"));
 const hardhat_2 = require("hardhat");
-const addresses_1 = __importDefault(require("../../src/addresses"));
+const config_1 = __importDefault(require("../../src/config"));
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
-    const chainlinkTokenAddress = addresses_1.default[hardhat_1.default.network.name].chainlinkToken;
-    const oracleContractAddress = addresses_1.default[hardhat_1.default.network.name].chainlinkOperator;
-    const chainlinkJobID = addresses_1.default[hardhat_1.default.network.name].chainlinkJobID;
+    const { chainlinkTokenAddress, chainlinkOperatorAddress, chainlinkJobID } = config_1.default[hardhat_1.default.network.name];
     const ChainlancerFactory = yield hardhat_2.ethers.getContractFactory("Chainlancer");
-    const chainlancer = yield ChainlancerFactory.deploy(oracleContractAddress, chainlinkJobID, 0, chainlinkTokenAddress);
+    const chainlancer = yield ChainlancerFactory.deploy(chainlinkOperatorAddress, chainlinkJobID, 0, chainlinkTokenAddress);
     yield chainlancer.deployed();
     console.log("===============================");
     console.log("Chainlancer Addr: ", chainlancer.address);

@@ -2,15 +2,15 @@ import { Requester, Validator } from "@chainlink/external-adapter";
 import { SHA3 } from "sha3";
 
 interface CustomParams {
-  ipfs_cid: string[];
   decryption_key: string[];
+  ipfs_cid: string[];
 }
 
 export interface RequestInput {
   id: string;
   data: {
-    ipfs_cid: string;
     decryption_key: string;
+    ipfs_cid: string;
   };
 }
 
@@ -20,21 +20,28 @@ const customError = (data: any): boolean => {
 };
 
 const customParams: CustomParams = {
-  ipfs_cid: ["ipfs_cid"],
   decryption_key: ["decryption_key"],
+  ipfs_cid: ["ipfs_cid"],
 };
 
 export const createRequest = (
   input: RequestInput,
   callback: (statusCode: number, data: any) => void
 ): void => {
-  const validator = new Validator(callback, input, customParams);
-  const jobRunID = validator.validated.id;
+  // const validator = new Validator(callback, input, customParams);
+  // const jobRunID = validator.validated.id;
 
-  const ipfs_cid = validator.validated.data.ipfs_cid;
-  const decryption_key = validator.validated.data.decryption_key;
+  // const ipfs_cid = validator.validated.data.ipfs_cid;
+  // const decryption_key = validator.validated.data.decryption_key;
+
+  console.log("input:");
+  console.log(input);
+
+  const jobRunID = input.id;
+  const { ipfs_cid, decryption_key } = input.data;
 
   console.log("-----------------------");
+  console.log("ipfs_cid, decryption_key:");
   console.log(ipfs_cid, decryption_key);
   console.log("-----------------------");
 

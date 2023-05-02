@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: clr-ea-services
-          image: gcr.io/chainlancer-384913/clr-ea-services:0.0.8
+          image: gcr.io/chainlancer-384913/clr-ea-services:0.0.9
           ports:
             - containerPort: 8080
 ---

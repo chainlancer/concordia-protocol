@@ -34,7 +34,7 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
         address payable verifier;
         bool paid;
         bool verifierApproved;
-        bytes decryptionKey;
+        string decryptionKey;
         string ipfsCID;
     }
 
@@ -44,7 +44,7 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
     // todo: cleanup
     struct TempData {
         uint256 workAgreementId;
-        bytes key;
+        string key;
     }
 
     // maps a Chainlink request ID to a tuple containing the work agreement ID and the decryption key. We chose to
@@ -74,7 +74,7 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
     );
     event DecryptionKeyUpdated(
         uint256 indexed workAgreementId,
-        bytes decryptionKey
+        string decryptionKey
     );
     event FundsWithdrawn(
         uint256 indexed workAgreementId,
@@ -188,7 +188,7 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
     // hashed and compared to the stored checksum. The key is accepted if the hashes match.
     function updateDecryptionKey(
         uint256 _workAgreementId,
-        bytes memory _decryptionKey
+        string memory _decryptionKey
     ) public {
         WorkAgreement storage agreement = workAgreements[_workAgreementId];
         require(
@@ -221,14 +221,14 @@ contract Chainlancer is ChainlinkClient, ConfirmedOwner {
     // Fetch the work hash from IPFS using Chainlink
     function fetchWorkHash(
         string memory ipfsCID,
-        bytes memory decryptionKey
+        string memory decryptionKey
     ) public onlyOwner returns (bytes32 requestId) {
         Chainlink.Request memory req = buildOperatorRequest(
             stringToBytes32(CHAINLINK_JOB),
             this.fulfillWorkHash.selector
         );
         req.add("ipfs_cid", ipfsCID);
-        req.addBytes("decryption_key", decryptionKey);
+        req.add("decryption_key", decryptionKey);
         requestId = sendChainlinkRequestTo(ORACLE, req, CHAINLINK_FEE);
     }
 

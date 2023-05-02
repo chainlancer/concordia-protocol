@@ -1,22 +1,19 @@
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import addresses from "../../src/addresses";
+import config from "../../src/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { getDeployedContract } from "../../src/utils";
 
 async function main() {
   const signer = hre.ethers.provider.getSigner();
 
-  const network = hre.network.name;
-  const {
-    chainlinkOperator: operatorContractAddress,
-    chainlinkNode: chainlinkNodeAddress,
-  } = addresses[network];
+  const { chainlinkOperatorAddress, chainlinkNodeAddress } =
+    config[hre.network.name];
 
   const contract = await getDeployedContract(
     hre,
     "Operator",
-    operatorContractAddress
+    chainlinkOperatorAddress
   );
   console.log(chainlinkNodeAddress);
 

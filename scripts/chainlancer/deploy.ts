@@ -1,15 +1,14 @@
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import addresses from "../../src/addresses";
+import config from "../../src/config";
 
 const main = async () => {
-  const chainlinkTokenAddress = addresses[hre.network.name].chainlinkToken;
-  const oracleContractAddress = addresses[hre.network.name].chainlinkOperator;
-  const chainlinkJobID = addresses[hre.network.name].chainlinkJobID;
+  const { chainlinkTokenAddress, chainlinkOperatorAddress, chainlinkJobID } =
+    config[hre.network.name];
 
   const ChainlancerFactory = await ethers.getContractFactory("Chainlancer");
   const chainlancer = await ChainlancerFactory.deploy(
-    oracleContractAddress,
+    chainlinkOperatorAddress,
     chainlinkJobID,
     0,
     chainlinkTokenAddress
