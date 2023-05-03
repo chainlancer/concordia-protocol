@@ -1,0 +1,75 @@
+import curses
+import random
+
+def main(stdscr):
+    # Initialize game window
+    curses.curs_set(0)
+    sh, sw = stdscr.getmaxyx()
+    w = curses.newwin(sh, sw, 0, 0)
+    w.timeout(100)
+    w.keypad(1)
+    w.border(0)
+
+    # Initialize snake
+    snake_x = sw // 4
+    snake_y = sh // 2
+    snake = [
+        [snake_y, snake_x],
+        [snake_y, snake_x - 1],
+        [snake_y, snake_x - 2]
+    ]
+
+    # Initialize food
+    food = [sh // 2, sw // 2]
+    w.addch(food[0], food[1], curses.ACS_PI)
+
+    # Game loop
+    while True:
+        key = w.getch()
+        if key != -1:
+            new_dir = key
+
+        if new_dir in [curses.KEY_DOWN, curses.KEY_UP, curses.KEY_LEFT, curses.KEY_RIGHT]:
+            key = new_dir
+
+        # Calculate next position of the snake head
+        new_head = [snake[0][0], snake[0][1]]
+
+        if key == curses.KEY_DOWN:
+            new_head[0] += 1
+        if key == curses.KEY_UP:
+            new_head[0] -= 1
+        if key == curses.KEY_LEFT:
+            new_head[1] -= 1
+        if key == curses.KEY_RIGHT:
+            new_head[1] += 1
+
+        # Check for collision with wall or self
+        if new_head[0] in [0, sh] or new_head[1] in [0, sw] or new_head in snake:
+            break
+
+        # Add new head to the snake
+        snake.insert(0, new_head)
+        w.addch(new_head[0], new_head[1], '#')
+
+        # Check if snake ate food
+        if new_head == food:
+            # Generate new food
+            while food in snake:
+                food = [random.randint(1, sh - 2), random.randint(1, sw - 2)]
+            w.addch(food[0], food[1], curses.ACS_PI)
+        else:
+            # Remove tail of the snake
+            tail = snake.pop()
+            w.addch(tail[0], tail[1], ' ')
+
+        # Update the window
+        w.refresh()
+
+    # End the game
+    w.addstr(sh // 2, (sw - len("Game Over!")) // 2, "Game Over!")
+    w.refresh()
+    w.getch()
+
+if name == "main":
+curses.wrapper(main)

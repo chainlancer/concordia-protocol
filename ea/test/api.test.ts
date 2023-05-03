@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import config from "../../config";
 import { fetchDataFromIPFS } from "../src/clients/ipfs";
-import * as crypto from "crypto";
+import * as CryptoJS from "crypto-js";
 
 describe("Decrypt encrypted work on IPFS with secret key", () => {
   const cid = "QmYMuDSmCwg5vyfCfmcxRiVu4sRGKQoKn9FDL9y9cLLBdo";
@@ -16,27 +16,29 @@ describe("Decrypt encrypted work on IPFS with secret key", () => {
     expect(data).to.not.equal(undefined);
     if (!data) return;
 
-    const ciphertext = Buffer.from(data, "base64");
+    const ciphertext = CryptoJS.enc.Base64.parse(data);
 
-    const nonce = ciphertext.slice(0, 12);
-    const encryptedData = ciphertext.slice(12);
-
-    const decipher = crypto.createDecipheriv(
-      "aes-128-gcm",
-      Buffer.from(key, "hex"),
-      nonce
+    const nonce = CryptoJS.lib.WordArray.create(ciphertext.words.slice(0, 3));
+    const encryptedData = CryptoJS.lib.WordArray.create(
+      ciphertext.words.slice(3)
     );
 
-    const authTag = encryptedData.slice(-16);
-    decipher.setAuthTag(authTag);
+    const decipherKey = CryptoJS.enc.Hex.parse(key);
 
-    const encryptedText = encryptedData.slice(0, -16);
-    const plaintextBuffer = Buffer.concat([
-      decipher.update(encryptedText),
-      decipher.final(),
-    ]);
+    const cipherParams = CryptoJS.lib.CipherParams.create({
+      ciphertext: encryptedData,
+      key: decipherKey,
+      iv: nonce,
+    });
 
-    const plaintext = plaintextBuffer.toString("utf-8");
+    const decryptedData = CryptoJS.AES.decrypt(cipherParams, decipherKey, {
+      mode: CryptoJS.mode.CTR,
+      padding: CryptoJS.pad.NoPadding,
+    });
+
+    console.log("here");
+
+    const plaintext = CryptoJS.enc.Utf8.stringify(decryptedData);
     console.log(plaintext);
   });
 });

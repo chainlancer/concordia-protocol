@@ -9,7 +9,7 @@ port := 8080
 list:
 	@grep '^[^#[:space:]].*:' Makefile | grep -v ':=' | grep -v '^\.' | sed 's/:.*//g' | sed 's/://g' | sort
 
-install-dependencies:
+install:
 	pip install bumpversion
 	yarn install
 
@@ -35,6 +35,11 @@ ea-dev:
 
 ea-test:
 	yarn --cwd ea test
+
+# lib
+
+lib-test:
+	yarn --cwd lib test
 
 # docker
 

@@ -1,5 +1,6 @@
 import { Requester, Validator } from "@chainlink/external-adapter";
 import { SHA3 } from "sha3";
+import { encodeSHA3 } from "../../lib/cryptography/sha";
 
 interface CustomParams {
   decryption_key: string[];
@@ -40,16 +41,15 @@ export const createRequest = (
   const jobRunID = input.id;
   const { ipfs_cid, decryption_key } = input.data;
 
-  console.log("-----------------------");
-  console.log("ipfs_cid, decryption_key:");
-  console.log(ipfs_cid, decryption_key);
-  console.log("-----------------------");
+  // console.log("-----------------------");
+  // console.log("ipfs_cid, decryption_key:");
+  // console.log(ipfs_cid, decryption_key);
+  // console.log("-----------------------");
 
   // todo: some stuff with decryption_key
 
   const url = `https://ipfs.io/ipfs/${ipfs_cid}`;
   const params = {};
-
   const config = {
     url,
     params,
@@ -57,8 +57,7 @@ export const createRequest = (
 
   Requester.request(config, customError)
     .then((response: any) => {
-      const hash = new SHA3(256);
-      const result = hash.update(response.data).digest("hex");
+      const result = encodeSHA3(response.data);
       console.log("result", result);
 
       const res = {

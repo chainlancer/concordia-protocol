@@ -5,7 +5,8 @@
   "license": "MIT",
   "workspaces": [
     "ea",
-    "sol"
+    "sol",
+    "lib"
   ],
   "scripts": {},
   "devDependencies": {
