@@ -1,4 +1,8 @@
 const config: any = {
+  ipfs: {
+    host: process.env.IPFS_HOST,
+    apiKey: process.env.IPFS_API_KEY,
+  },
   sepolia: {
     providerURL: process.env.SEPOLIA_URL,
     chainlinkTokenAddress: process.env.CHAINLINK_TOKEN_ADDRESS_SEPOLIA,

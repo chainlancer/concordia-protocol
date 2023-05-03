@@ -33,6 +33,9 @@ ea-dev:
 	make ea-build
 	yarn --cwd ea start
 
+ea-test:
+	yarn --cwd ea test
+
 # docker
 
 ea-docker-build:
