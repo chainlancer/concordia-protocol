@@ -1,14 +1,14 @@
 {
-  "name": "hardhat-project",
+  "name": "lancer-protocol",
   "type": "commonjs",
   "private": true,
   "license": "MIT",
   "workspaces": [
-    "api",
+    "ea",
     "sol"
   ],
   "scripts": {
-    "test": "yarn workspaces sol test"
+    "test": "yarn --cwd sol hardhat test && yarn --cwd ea test"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.3",

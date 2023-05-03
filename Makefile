@@ -24,40 +24,40 @@ bumpversion-minor:
 bumpversion-major:
 	bumpversion major --allow-dirty
 
-# api
+# ea
 
-api-build:
-	yarn --cwd api build
+ea-build:
+	yarn --cwd ea build
 
-api-dev:
-	make api-build
-	yarn --cwd api start
+ea-dev:
+	make ea-build
+	yarn --cwd ea start
 
 # docker
 
-api-docker-build:
-	cd api && docker build -t $(gcr-image) .
+ea-docker-build:
+	cd ea && docker build -t $(gcr-image) .
 
-api-docker-dev:
+ea-docker-dev:
 	make docker-build
 	make docker-run
 
-api-docker-push:
+ea-docker-push:
 	docker push $(gcr-image)
 
-api-docker-run:
+ea-docker-run:
 	@docker run -itp $(port):$(port)  $(gcr-image)
 
 # deploy
 
-api-deploy-sepolia:
+ea-deploy-sepolia:
 	kubectl apply -f deployments/sepolia/k8s/clr-ea-services.yml
 
-api-deploy-mainnet:
+ea-deploy-mainnet:
 	# kubectl apply -f deployments/mainnet/k8s/clr-ea-services.yml
 	echo "TODO"
 
-api-build-push-deploy-sepolia:
+ea-build-push-deploy-sepolia:
 	make bumpversion-patch
 	make docker-build
 	make docker-push

@@ -151,19 +151,19 @@ _ci/cd coming soon_
 
 ```bash
 # build (ignore build error)
-$ make build
+$ make ea-build
 
 # bump version
 $ make bumpversion-patch
 
 # build image
-$ make docker-build
+$ make ea-docker-build
 
 # push image to gcr
-$ make docker-push
+$ make ea-docker-push
 
 # deploy ea service
-$ make k8s-deploy-sepolia
+$ make ea-deploy-sepolia
 ```
 
 ##### Interaction
@@ -185,5 +185,3 @@ $ kubectl port-forward service/clr-ea-services 8080:8080
 # check health
 $ curl http://localhost:8080/health
 ```
-
-

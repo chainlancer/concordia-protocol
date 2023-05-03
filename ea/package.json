@@ -1,11 +1,11 @@
 {
-  "name": "api",
+  "name": "ea",
   "type": "commonjs",
   "private": true,
   "version": "1.0.0",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/api/index.js"
+    "start": "node dist/ea/index.js"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "^4.8.3",
