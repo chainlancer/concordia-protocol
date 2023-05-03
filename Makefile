@@ -11,16 +11,7 @@ list:
 
 install-dependencies:
 	pip install bumpversion
-	npm install
-
-# develop
-
-build:
-	tsc
-
-dev:
-	make build
-	yarn start
+	yarn install
 
 # bumpversion
 
@@ -33,53 +24,47 @@ bumpversion-minor:
 bumpversion-major:
 	bumpversion major --allow-dirty
 
+# api
+
+api-build:
+	yarn --cwd api build
+
+api-dev:
+	make api-build
+	yarn --cwd api start
+
 # docker
 
-docker-build:
-	docker build -t $(gcr-image) .
+api-docker-build:
+	cd api && docker build -t $(gcr-image) .
 
-docker-dev:
+api-docker-dev:
 	make docker-build
 	make docker-run
 
-docker-push:
+api-docker-push:
 	docker push $(gcr-image)
 
-docker-run:
+api-docker-run:
 	@docker run -itp $(port):$(port)  $(gcr-image)
 
-# kubernetes
+# deploy
 
-k8s-deploy-sepolia:
+api-deploy-sepolia:
 	kubectl apply -f deployments/sepolia/k8s/clr-ea-services.yml
 
-k8s-deploy-mainnet:
+api-deploy-mainnet:
 	# kubectl apply -f deployments/mainnet/k8s/clr-ea-services.yml
 	echo "TODO"
 
-k8s-build-push-deploy-sepolia:
+api-build-push-deploy-sepolia:
 	make bumpversion-patch
 	make docker-build
 	make docker-push
 	make k8s-deploy-sepolia
 
-# docker-compose
+operator-deploy-sepolia:
+	cd sol && npx hardhat run scripts/operator/deploy.ts --network sepolia
 
-docker-compose-sepolia:
-	cd docker/sepolia && docker-compose up
-
-docker-compose-mainnet:
-	echo "TODO"
-
-deploy-operator-sepolia:
-	npx hardhat run scripts/deploy-operator.ts --network sepolia
-
-deploy-operator-mainnet:
-	echo "TODO"
-
-deploy-chainlancer-sepolia:
-	npx hardhat run scripts/deploy-chainlancer.ts --network sepolia
-
-deploy-chainlancer-mainnet:
-	echo "TODO"
-
+lancer-deploy-sepolia:
+	cd sol && npx hardhat run scripts/lancer/deploy.ts --network sepolia

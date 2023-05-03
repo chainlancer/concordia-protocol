@@ -1,17 +1,15 @@
-# Chainlancer Solidity Contracts
-Chainlancer is a decentralized escrow platform that uses blockchain technology to facilitate secure and reliable digital work exchanges between freelancers and clients. 
+# Lancer Solidity Contracts
+Lancer is a decentralized protocol leveraging blockchain technology to enable secure and trustworthy digital work exchanges between freelancers and clients.
 
 ## Overview
 
-_a high level overview of chainlancer's architecture_
+_a high level overview of Lancer's architecture_
 
 ### How?
 
-_we use a zero knowledge proof to ensure that the supplied decryption key can decode the encrypted work on ipfs, this way both the proprietor and client cannot cheat the process_
+The freelancer (proprietor) completes the work and creates an encrypted work bundle (W) by combining the decryption key (k), client's wallet public key (p), and the work bundle (w). The encrypted work bundle is then uploaded to the InterPlanetary File System (IPFS).
 
-The proprietor (freelancer) completes the work and creates an encrypted work bundle (W) by combining the decryption key (k) with the client's wallet public key (p) and the work bundle (w). The encrypted work bundle is then uploaded to the InterPlanetary File System (IPFS).
-
-Once the client pays the contract in full, the proprietor provides the contract with the decryption key (k).
+Once the client pays the contract in full, the freelancer provides the contract with the decryption key (k).
 
 The smart contract calls a Chainlink External Adapter (EA) to fetch the encrypted work bundle (W) from IPFS.
 
@@ -21,9 +19,9 @@ The Chainlink EA then hashes the work package (w_p) using the SHA3-256 algorithm
 
 The smart contract compares the work agreement checksum (c) with the hashed work package (H(w_p)). If the two values match, the key is accepted, and the agreement is marked as "paid."
 
-Finally, the client can decrypt the encrypted work bundle (W) using the decryption key (k) and their wallet public key (p) to obtain the completed work (w).
+The client can decrypt the encrypted work bundle (W) using the decryption key (k) and their wallet public key (p) to obtain the completed work (w).
 
-This process ensures that both parties are protected, and payment is only released when the work is completed as agreed upon. The integration with Chainlink allows Chainlancer to securely and reliably fetch and process off-chain data, further enhancing the platform's functionality and security.
+This process ensures the protection of both parties, with payment released only when the work is completed as agreed upon. The integration with Chainlink allows the Lancer protocol to securely and reliably fetch and process off-chain data, further enhancing its functionality and security.
 
 **or as notation**
 
@@ -58,7 +56,7 @@ _all of our testing will be done on the sepolia testnet since it is cumbersome t
 the following contracts must be deployed:
 
 - [Operator](#operator)
-- [Chainlancer](#chainlancer)
+- [Lancer](#lancer)
 
 #### Operator
 
@@ -68,26 +66,26 @@ _An Operator contract is required to securely and efficiently manage communicati
 # deploy operator contract
 $ npx hardhat run scripts/operator/deploy.ts --network sepolia
 
-# set authorized senders
-$ npx hardhat run scripts/operator/setAuthorizedSenders.ts --network sepolia
+# set authorized senders (TODO)
+$ npx hardhat operatorSetAuthorizedSenders --network sepolia
 ```
 
-#### Chainlancer
+#### Lancer
 
-_The Chainlancer contract facilitates the creation, payment, approval, and updates of work agreements._
+_The Lancer contract facilitates the creation, payment, approval, and updates of work agreements._
 
 ```bash
-# deploy chainlancer contract
-$ npx hardhat run scripts/chainlancer-deploy.ts --network sepolia
+# deploy lancer contract
+$ npx hardhat scripts/lancer/deploy.ts --network sepolia
 
 # create work agreement
-$ npx hardhat run scripts/chainlancer/createWorkAgreement.ts --network sepolia
+$ npx hardhat lancerCreateWorkAgreement --cid IPFS_CID --checksum CHECKSUM --network sepolia
 
 # pay for work agreement
-$ npx hardhat run scripts/chainlancer/payWorkAgreement.ts --network sepolia
+$ npx hardhat lancerPayWorkAgreement --wid WORK_AGREEMENT_ID --network sepolia
 
 # update decryption key for work agreement
-$ npx hardhat run scripts/chainlancer/updateDecryptionKey.ts --network sepolia
+$ npx hardhat lancerUpdateDecryptionKey --network sepolia
 ```
 
 ## Chainlink

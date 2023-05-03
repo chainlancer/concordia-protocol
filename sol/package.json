@@ -1,14 +1,11 @@
 {
-  "name": "hardhat-project",
+  "name": "sol",
   "type": "commonjs",
   "private": true,
-  "license": "MIT",
-  "workspaces": [
-    "api",
-    "sol"
-  ],
+  "version": "1.0.0",
   "scripts": {
-    "test": "yarn workspaces sol test"
+    "test": "npx hardhat test",
+    "hardhat": "hardhat"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.3",
@@ -45,5 +42,14 @@
     "ts-node": "^10.8.2",
     "typechain": "^5.2.0",
     "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^0.6.1",
+    "@chainlink/external-adapter": "^0.2.6",
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "i": "^0.3.7",
+    "npm": "^9.6.5",
+    "sha3": "^2.1.4"
   }
 }
