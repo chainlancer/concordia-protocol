@@ -1,10 +1,10 @@
 import config from "../../config";
-import { ethers } from "ethers";
+import { Provider, ethers } from "ethers";
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { Wallet } from "@ethersproject/wallet";
 
 // todo
 export function getDefaultSigner() {
-  const provider = new ethers.providers.JsonRpcProvider(
-    config["sepolia"].providerURL
-  );
-  return new ethers.Wallet(config["sepolia"].privateKey, provider);
+  const provider = new JsonRpcProvider(config["sepolia"].providerURL);
+  return new Wallet(config["sepolia"].privateKey, provider);
 }

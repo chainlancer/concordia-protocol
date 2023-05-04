@@ -21,6 +21,7 @@
     "./src",
     "./tasks",
     "./test",
+    "./scripts"
   ],
   "exclude": [
     "node_modules"

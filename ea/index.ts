@@ -1,6 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { RequestInput, createRequest } from "./src/request";
+import { RequestInput, createRequest } from "./src/handlers";
 
 const app = express();
 const port = process.env.EA_PORT || 8080;

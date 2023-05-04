@@ -1,6 +1,6 @@
 import { Requester, Validator } from "@chainlink/external-adapter";
-import { SHA3 } from "sha3";
-import { encodeSHA3 } from "../../lib/cryptography/sha";
+import { encodeSHA3 } from "../../../lib/cryptography/sha";
+import { arrayify } from "@ethersproject/bytes";
 
 interface CustomParams {
   decryption_key: string[];
@@ -35,9 +35,6 @@ export const createRequest = (
   // const ipfs_cid = validator.validated.data.ipfs_cid;
   // const decryption_key = validator.validated.data.decryption_key;
 
-  console.log("input:");
-  console.log(input);
-
   const jobRunID = input.id;
   const { ipfs_cid, decryption_key } = input.data;
 
@@ -57,8 +54,10 @@ export const createRequest = (
 
   Requester.request(config, customError)
     .then((response: any) => {
+      console.log(response.data);
       const result = encodeSHA3(response.data);
-      console.log("result", result);
+      // const result = arrayify("0x" + hash);
+      console.log(result);
 
       const res = {
         data: {

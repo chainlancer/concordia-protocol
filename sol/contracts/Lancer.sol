@@ -4,25 +4,6 @@ pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
-// Encryption process:
-//
-// decryption key k
-// client's wallet public key p
-// work bundle w
-// encrypted work bundle on IPFS W = k(w_p)
-// SHA3-256 H
-// work agreement checksum c = H(w_p)
-//
-// How it works:
-// 1. proprietor uploads W to IPFS
-// 2. after contract is paid in full, proprietor provides the contract with k
-// 2.1. contract calls Chainlink EA to fetch W from IPFS
-// 2.2. Chainlink EA unwraps W with k resulting in w_p
-// 2.3. w_p is hashed H(w_p) and returned to the contract
-// 2.4. contract compares c with H(w_p)
-// 2.5. if true, key is accepted and the agreement is marked as "paid"
-// 3. client can decrypt W with k and p to get w
-
 contract Lancer is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
@@ -34,25 +15,20 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         address payable verifier;
         bool paid;
         bool verifierApproved;
-        string decryptionKey;
+        bytes decryptionKey;
         string ipfsCID;
     }
 
     mapping(uint256 => WorkAgreement) public workAgreements;
     uint256 public workAgreementCount;
 
-    // todo: cleanup
     struct TempData {
         uint256 workAgreementId;
-        string key;
+        bytes key;
     }
 
-    // maps a Chainlink request ID to a tuple containing the work agreement ID and the decryption key. We chose to
-    // use this mapping to store these associations, rather than passing these values through the external adapter, to
-    // instill that the contract is the source of truth
     mapping(bytes32 => TempData) private requestIdToTempData;
 
-    // Chainlink variables
     address private ORACLE;
     string private CHAINLINK_JOB;
     uint256 private CHAINLINK_FEE;
@@ -74,11 +50,11 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
     );
     event WorkAgreementDecryptionKeyUpdated(
         uint256 indexed workAgreementId,
-        string decryptionKey
+        bytes decryptionKey
     );
     event WorkAgreementDecryptionKeyUpdateFailed(
         uint256 indexed workAgreementId,
-        string invalidDecryptionKey
+        bytes invalidDecryptionKey
     );
     event FundsWithdrawn(
         uint256 indexed workAgreementId,
@@ -111,7 +87,6 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         }
 
         assembly {
-            // solhint-disable-line no-inline-assembly
             result := mload(add(source, 32))
         }
     }
@@ -145,7 +120,6 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    // Proprietor can create a new work agreement
     function createWorkAgreement(
         bytes32 _checksum,
         uint256 _price,
@@ -168,8 +142,6 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         emit WorkAgreementCreated(workAgreementCount, msg.sender);
     }
 
-    // Anyone can pay
-    // TODO: should be able to make multiple payments
     function payWorkAgreement(uint256 _workAgreementId) public payable {
         WorkAgreement storage agreement = workAgreements[_workAgreementId];
         require(msg.value == agreement.price, "Incorrect payment amount");
@@ -177,7 +149,6 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         emit WorkAgreementPaid(_workAgreementId, msg.sender);
     }
 
-    // Optional third-party verifier can approve the work, one of the requirements for the proprietor to withdraw funds
     function approveWorkAgreement(uint256 _workAgreementId) public {
         WorkAgreement storage agreement = workAgreements[_workAgreementId];
         require(
@@ -188,11 +159,9 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         emit WorkAgreementVerifierApproved(_workAgreementId, msg.sender);
     }
 
-    // Proprietor uploads k which is passed to the Chainlink EA who fetches W from IPFS and unwraps it. The result is
-    // hashed and compared to the stored checksum. The key is accepted if the hashes match.
     function updateDecryptionKey(
         uint256 _workAgreementId,
-        string memory _decryptionKey
+        bytes memory _decryptionKey
     ) public {
         WorkAgreement storage agreement = workAgreements[_workAgreementId];
         require(
@@ -214,25 +183,22 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         );
         require(agreement.paid, "Client has not paid");
         require(agreement.verifierApproved, "Verifier has not approved");
-        // todo:
-        // require(agreement.decryptionKey != "", "Decryption key not provided");
         uint256 amount = agreement.price;
         agreement.price = 0;
         agreement.proprietor.transfer(amount);
         emit FundsWithdrawn(_workAgreementId, msg.sender);
     }
 
-    // Fetch the work hash from IPFS using Chainlink
     function fetchWorkHash(
         string memory ipfsCID,
-        string memory decryptionKey
+        bytes memory decryptionKey
     ) public onlyOwner returns (bytes32 requestId) {
         Chainlink.Request memory req = buildOperatorRequest(
             stringToBytes32(CHAINLINK_JOB),
             this.fulfillWorkHash.selector
         );
         req.add("ipfs_cid", ipfsCID);
-        req.add("decryption_key", decryptionKey);
+        req.addBytes("decryption_key", decryptionKey);
         requestId = sendChainlinkRequestTo(ORACLE, req, CHAINLINK_FEE);
     }
 
@@ -250,7 +216,6 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         );
     }
 
-    // Receive the work hash from Chainlink
     function fulfillWorkHash(
         bytes32 _requestId,
         bytes32 _hash

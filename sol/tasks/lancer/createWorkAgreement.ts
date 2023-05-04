@@ -23,10 +23,12 @@ task("lancerCreateWorkAgreement", "Create a work agreement")
 
     const contract = await getDeployedContract(hre, LANCER, lancerAddress);
 
+    const checksumData = ethers.utils.arrayify("0x" + checksum);
+    console.log(checksumData);
     const tx = await contract
       .connect(signer)
       .createWorkAgreement(
-        ethers.utils.arrayify("0x" + checksum),
+        checksumData,
         ethers.utils.parseEther(price),
         await signer.getAddress(),
         verifier,
