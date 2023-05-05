@@ -1,5 +1,5 @@
 import config from "../../config";
-import { Provider, ethers } from "ethers";
+import { ethers } from "ethers";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { Wallet } from "@ethersproject/wallet";
 

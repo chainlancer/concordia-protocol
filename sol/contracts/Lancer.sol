@@ -26,7 +26,6 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         uint256 workAgreementId;
         bytes key;
     }
-
     mapping(bytes32 => TempData) private requestIdToTempData;
 
     address private ORACLE;
@@ -60,6 +59,7 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         uint256 indexed workAgreementId,
         address indexed proprietor
     );
+    event CompareChecksumAndHash(bytes32 checksum, bytes32 hash);
 
     constructor(
         address _oracle,
@@ -224,6 +224,7 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         WorkAgreement storage agreement = workAgreements[
             tempData.workAgreementId
         ];
+        emit CompareChecksumAndHash(agreement.checksum, _hash);
         if (agreement.checksum == _hash) {
             agreement.decryptionKey = tempData.key;
             emit WorkAgreementDecryptionKeyUpdated(

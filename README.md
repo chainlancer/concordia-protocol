@@ -1,5 +1,5 @@
 # Lancer Solidity Contracts
-Lancer is a decentralized protocol leveraging blockchain technology to enable secure and trustworthy digital work exchanges between freelancers and clients.
+Lancer is a decentralized protocol leveraging blockchain technology to enable trustless atomic swaps of digital work between workers and clients.
 
 ## Overview
 

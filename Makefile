@@ -1,5 +1,5 @@
 service := clr-ea-services
-version := 0.0.21
+version := 0.0.26
 gcloud_proj_id := chainlancer-384913
 cluster := chainlancer
 gcr-image := gcr.io/${gcloud_proj_id}/${service}:${version}

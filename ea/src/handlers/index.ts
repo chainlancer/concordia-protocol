@@ -1,6 +1,6 @@
 import { Requester, Validator } from "@chainlink/external-adapter";
 import { encodeSHA3 } from "../../../lib/cryptography/sha";
-import { arrayify } from "@ethersproject/bytes";
+import { ethers } from "ethers";
 
 interface CustomParams {
   decryption_key: string[];
@@ -55,19 +55,23 @@ export const createRequest = (
   Requester.request(config, customError)
     .then((response: any) => {
       console.log(response.data);
-      const result = encodeSHA3(response.data);
-      // const result = arrayify("0x" + hash);
-      console.log(result);
+
+      const hash = encodeSHA3(response.data);
+      console.log("hash", hash);
+
+      const hashBytes = ethers.utils.hexZeroPad("0x" + hash, 32);
+      console.log("bytes", hashBytes);
 
       const res = {
         data: {
-          result,
+          result: hashBytes,
         },
         status: response.status,
       };
       callback(response.status, Requester.success(jobRunID, res));
     })
     .catch((error: any) => {
+      console.log(error);
       // eslint-disable-next-line node/no-callback-literal
       callback(500, Requester.errored(jobRunID, error));
     });
