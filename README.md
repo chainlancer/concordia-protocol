@@ -157,6 +157,15 @@ $ yarn --cwd sol npx hardhat lancerWorkAgreements --wid 1 --network sepolia
         ipfsCID: 'QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq'
     ]
 
+fetch the content from IPFS and decrypt using the decryption key
+
+```bash
+$ curl https://lancer.mypinata.cloud/ipfs/QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq
+```
+>> d87e3eed86bfed5ffae1784705cdc845c4438e97707077cb4897e605cd917012
+
+_decrypt with AES_
+>> Hello World!
 
 ## Chainlink
 
