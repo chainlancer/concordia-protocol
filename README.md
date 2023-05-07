@@ -64,10 +64,10 @@ _An Operator contract is required to securely and efficiently manage communicati
 
 ```bash
 # deploy operator contract
-$ npx hardhat run scripts/operator/deploy.ts --network sepolia
+$ yarn --cwd sol npx hardhat run scripts/operator/deploy.ts --network sepolia
 
 # set authorized senders (TODO)
-$ npx hardhat operatorSetAuthorizedSenders --network sepolia
+$ yarn --cwd sol npx hardhat operatorSetAuthorizedSenders --network sepolia
 ```
 
 #### Lancer
@@ -98,6 +98,8 @@ first, deploy a fresh contract:
 ```bash
 $ yarn --cwd sol npx hardhat scripts/lancer/deploy.ts --network sepolia
 ```
+
+then update the .env with the new contract address.
 
 let's assume that our content is simply, "Hello World!" and we're using a 16-byte key, "207109403456bdad4a9711d9f40aebff"
 
@@ -135,27 +137,26 @@ get work agreement
 ```bash
 $ yarn --cwd sol npx hardhat lancerWorkAgreements --wid 1 --network sepolia
 ```
-
 >> work agreement: [
-        '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
-        BigNumber { value: "0" },
-        '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
-        '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
-        '0x0000000000000000000000000000000000000000',
-        true,
-        true,
-        '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
-        'QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq',
-        checksum: '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
-        price: BigNumber { value: "0" },
-        proprietor: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
-        client: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
-        verifier: '0x0000000000000000000000000000000000000000',
-        paid: true,
-        verifierApproved: true,
-        decryptionKey: '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
-        ipfsCID: 'QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq'
-    ]
+    '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
+    BigNumber { value: "0" },
+    '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+    '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+    '0x0000000000000000000000000000000000000000',
+    true,
+    true,
+    '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
+    'QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq',
+    checksum: '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
+    price: BigNumber { value: "0" },
+    proprietor: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+    client: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+    verifier: '0x0000000000000000000000000000000000000000',
+    paid: true,
+    verifierApproved: true,
+    decryptionKey: '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
+    ipfsCID: 'QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq'
+]
 
 fetch the content from IPFS and decrypt using the decryption key
 
