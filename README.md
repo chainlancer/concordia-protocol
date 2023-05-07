@@ -76,17 +76,87 @@ _The Lancer contract facilitates the creation, payment, approval, and updates of
 
 ```bash
 # deploy lancer contract
-$ npx hardhat scripts/lancer/deploy.ts --network sepolia
+$ yarn --cwd sol npx hardhat scripts/lancer/deploy.ts --network sepolia
 
 # create work agreement
-$ npx hardhat lancerCreateWorkAgreement --cid IPFS_CID --checksum CHECKSUM --network sepolia
+$ yarn --cwd sol npx hardhat lancerCreateWorkAgreement --cid IPFS_CID --checksum CHECKSUM --network sepolia
 
 # pay for work agreement
-$ npx hardhat lancerPayWorkAgreement --wid WORK_AGREEMENT_ID --network sepolia
+$ yarn --cwd sol npx hardhat lancerPayWorkAgreement --wid WORK_AGREEMENT_ID --network sepolia
 
 # update decryption key for work agreement
-$ npx hardhat lancerUpdateDecryptionKey --network sepolia
+$ yarn --cwd sol npx hardhat lancerUpdateDecryptionKey --network sepolia
+
+# get work agreement by id
+$ yarn --cwd sol npx hardhat lancerWorkAgreements --wid WORK_AGREEMENT_ID --network sepolia
 ```
+
+**try this demo**
+
+first, deploy a fresh contract:
+
+```bash
+$ yarn --cwd sol npx hardhat scripts/lancer/deploy.ts --network sepolia
+```
+
+let's assume that our content is simply, "Hello World!" and we're using a 16-byte key, "207109403456bdad4a9711d9f40aebff"
+
+create a checksum our content, "Hello World!" with the SHA3_256 algorithm:
+>> checksum: d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af
+
+use AES encoding to encode your content with our key, "207109403456bdad4a9711d9f40aebff"
+>> encrypted content: d87e3eed86bfed5ffae1784705cdc845c4438e97707077cb4897e605cd917012
+
+pin encrypted content on IPFS and get CID
+>> CID: QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq
+
+okay now we can create a work agreement. note that default buyer is work agreement creator and default price is 0
+
+```bash
+$ yarn --cwd sol npx hardhat lancerCreateWorkAgreement --cid QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq --checksum d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af --network sepolia
+```
+>> work agreement id: 1
+
+next, we can pay for our work agreement
+
+```bash
+$ yarn --cwd sol npx hardhat lancerPayWorkAgreement --wid 1 --network sepolia
+```
+
+now that the agreement is paid we can pass in our decryption key to withdraw the funds. note that the default price
+was 0 so there will be no funds in the agreement
+
+```bash
+$ yarn --cwd sol npx hardhat lancerUpdateDecryptionKey --wid 1 --key 207109403456bdad4a9711d9f40aebff --network sepolia
+```
+
+get work agreement
+
+```bash
+$ yarn --cwd sol npx hardhat lancerWorkAgreements --wid 1 --network sepolia
+```
+
+>> work agreement: [
+        '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
+        BigNumber { value: "0" },
+        '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+        '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+        '0x0000000000000000000000000000000000000000',
+        true,
+        true,
+        '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
+        'QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq',
+        checksum: '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
+        price: BigNumber { value: "0" },
+        proprietor: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+        client: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+        verifier: '0x0000000000000000000000000000000000000000',
+        paid: true,
+        verifierApproved: true,
+        decryptionKey: '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
+        ipfsCID: 'QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq'
+    ]
+
 
 ## Chainlink
 

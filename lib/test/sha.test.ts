@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import fs from "fs";
-import { encodeSHA3 } from "../cryptography/sha";
+import { encodeSHA3 } from "../src/sha";
 import { arrayify } from "@ethersproject/bytes";
 
-describe("Cryptography", () => {
+describe("SHA", () => {
   it("SHA3_256", async () => {
     const fileContents = fs.readFileSync("./mock-data/data.txt", "utf-8");
     const checksum =
@@ -29,15 +29,3 @@ describe("Cryptography", () => {
     expect(hash).to.equal(checksum);
   });
 });
-
-// 208, 228, 116, 134, 187, 244, 193,
-// 106, 202, 194, 111, 139, 101,  53,
-// 146, 151,  60,  19,  98, 144, 159,
-// 144,  38,  40, 119,   8, 159, 156,
-// 138,  69,  54, 175
-
-// 208, 228, 116, 134, 187, 244, 193,
-// 106, 202, 194, 111, 139, 101,  53,
-// 146, 151,  60,  19,  98, 144, 159,
-// 144,  38,  40, 119,   8, 159, 156,
-// 138,  69,  54, 175

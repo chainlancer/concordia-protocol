@@ -1,6 +1,7 @@
 import { Requester, Validator } from "@chainlink/external-adapter";
-import { encodeSHA3 } from "../../../lib/cryptography/sha";
+import { encodeSHA3 } from "../../../lib/src/sha";
 import { ethers } from "ethers";
+import { decrypt } from "../../../lib/src/aes";
 
 interface CustomParams {
   decryption_key: string[];
@@ -25,27 +26,39 @@ const customParams: CustomParams = {
   ipfs_cid: ["ipfs_cid"],
 };
 
-export const createRequest = (
+// called by the chainlink node, fetches the data from ipfs, decrypts it, hashes it, and returns the hash
+export const ipfsDecryptAndValidate = (
   input: RequestInput,
   callback: (statusCode: number, data: any) => void
 ): void => {
+  // TODO: validate the input
   // const validator = new Validator(callback, input, customParams);
   // const jobRunID = validator.validated.id;
-
-  // const ipfs_cid = validator.validated.data.ipfs_cid;
   // const decryption_key = validator.validated.data.decryption_key;
 
   const jobRunID = input.id;
   const { ipfs_cid, decryption_key } = input.data;
 
-  // console.log("-----------------------");
-  // console.log("ipfs_cid, decryption_key:");
-  // console.log(ipfs_cid, decryption_key);
-  // console.log("-----------------------");
+  // convert decryption_key from base64 to hex
+  let decryptionKeyHex = Buffer.from(decryption_key, "base64").toString("hex");
 
-  // todo: some stuff with decryption_key
+  // TODO: revise this logic:
+  // remove leading zeros. this is necessary because the chainlink node will add leading zeros to the decryption key.
+  // note that this will break if the decryption key is prefixed with zeros
+  let index = 0;
+  while (
+    index < decryptionKeyHex.length &&
+    decryptionKeyHex.charAt(index) === "0"
+  ) {
+    index++;
+  }
+  decryptionKeyHex = decryptionKeyHex.substring(index);
+  console.log(decryptionKeyHex);
+  // decryptionKeyHex = parseInt(decryptionKeyHex, 16).toString(16);
+  // console.log(decryptionKeyHex);
 
-  const url = `https://ipfs.io/ipfs/${ipfs_cid}`;
+  // fetch the data from ipfs
+  const url = `https://lancer.mypinata.cloud/ipfs/${ipfs_cid}`;
   const params = {};
   const config = {
     url,
@@ -54,14 +67,34 @@ export const createRequest = (
 
   Requester.request(config, customError)
     .then((response: any) => {
-      console.log(response.data);
+      const { data } = response;
+      console.log("data: \n", data);
+      if (!data) {
+        // eslint-disable-next-line node/no-callback-literal
+        callback(500, Requester.errored(jobRunID, `no data found at ${url}`));
+        return;
+      }
 
-      const hash = encodeSHA3(response.data);
-      console.log("hash", hash);
+      // attempt to decrypt with the hex representation of the decryption key. return 500 if it fails
+      let decryptedData = null;
+      try {
+        decryptedData = decrypt(data.trim(), decryptionKeyHex);
+        console.log("decrypted: \n", decryptedData);
+      } catch (error) {
+        console.log("error: \n", error);
+        // eslint-disable-next-line node/no-callback-literal
+        callback(500, Requester.errored(jobRunID, error));
+        return;
+      }
 
+      // hash the decrypted data
+      const hash = encodeSHA3(decryptedData);
+
+      // convert the hash to bytes
       const hashBytes = ethers.utils.hexZeroPad("0x" + hash, 32);
-      console.log("bytes", hashBytes);
+      console.log("hash as bytes", hashBytes);
 
+      // return the bytes
       const res = {
         data: {
           result: hashBytes,
@@ -78,7 +111,7 @@ export const createRequest = (
 };
 
 export const gcpservice = (req: any, res: any): void => {
-  createRequest(req.body, (statusCode, data) => {
+  ipfsDecryptAndValidate(req.body, (statusCode, data) => {
     res.status(statusCode).send(data);
   });
 };
@@ -88,7 +121,7 @@ export const handler = (
   context: any,
   callback: (error: any, data: any) => void
 ): void => {
-  createRequest(event, (statusCode, data) => {
+  ipfsDecryptAndValidate(event, (statusCode, data) => {
     callback(null, data);
   });
 };
@@ -98,7 +131,7 @@ export const handlerv2 = (
   context: any,
   callback: (error: any, response: any) => void
 ): void => {
-  createRequest(JSON.parse(event.body), (statusCode, data) => {
+  ipfsDecryptAndValidate(JSON.parse(event.body), (statusCode, data) => {
     callback(null, {
       statusCode: statusCode,
       body: JSON.stringify(data),

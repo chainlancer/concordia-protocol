@@ -18,10 +18,7 @@ task("lancerUpdateDecryptionKey", "Update decryption key for a work agreement")
 
     const tx = await contract
       .connect(signer)
-      .updateDecryptionKey(
-        wid,
-        ethers.utils.formatBytes32String(key.slice(0, 32))
-      );
+      .updateDecryptionKey(wid, ethers.utils.hexZeroPad("0x" + key, 32));
     console.log("Transaction sent, waiting for it to be mined...");
 
     const receipt = await tx.wait();

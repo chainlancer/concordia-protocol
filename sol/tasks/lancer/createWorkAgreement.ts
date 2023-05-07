@@ -14,23 +14,24 @@ task("lancerCreateWorkAgreement", "Create a work agreement")
   .addParam("verifier", "The address of the verifier", DEFAULT_VERIFIER)
   .addParam("cid", "The IPFS CID for the work agreement", DEFAULT_IPFS_CID)
   .addParam("checksum", "The checksum for the work agreement", DEFAULT_CHECKSUM)
+  .addParam("buyer", "The address of the buyer")
   .setAction(async (args: any, hre: any) => {
-    const { price, verifier, cid: ipfsCID, checksum } = args;
-
     const signer = hre.ethers.provider.getSigner();
+
+    const { price, verifier, cid: ipfsCID, checksum } = args;
+    const buyer = args.buyer ?? (await signer.getAddress()); // default to signer address
 
     const { lancerAddress } = config[hre.network.name];
 
     const contract = await getDeployedContract(hre, LANCER, lancerAddress);
 
     const checksumData = ethers.utils.arrayify("0x" + checksum);
-    console.log(checksumData);
     const tx = await contract
       .connect(signer)
       .createWorkAgreement(
         checksumData,
         ethers.utils.parseEther(price),
-        await signer.getAddress(),
+        buyer,
         verifier,
         ipfsCID
       );
