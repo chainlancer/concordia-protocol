@@ -104,20 +104,20 @@ then update the .env with the new contract address.
 let's assume that our content is simply, "Hello World!" and we're using a 16-byte key, "207109403456bdad4a9711d9f40aebff"
 
 create a checksum our content, "Hello World!" with the SHA3_256 algorithm:
->> checksum: d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af
+> checksum: d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af
 
 use AES encoding to encode your content with our key, "207109403456bdad4a9711d9f40aebff"
->> encrypted content: d87e3eed86bfed5ffae1784705cdc845c4438e97707077cb4897e605cd917012
+> encrypted content: d87e3eed86bfed5ffae1784705cdc845c4438e97707077cb4897e605cd917012
 
 pin encrypted content on IPFS and get CID
->> CID: QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq
+> CID: QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq
 
 okay now we can create a work agreement. note that default buyer is work agreement creator and default price is 0
 
 ```bash
 $ yarn --cwd sol npx hardhat lancerCreateWorkAgreement --cid QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq --checksum d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af --network sepolia
 ```
->> work agreement id: 1
+> work agreement id: 1
 
 next, we can pay for our work agreement
 
@@ -137,7 +137,7 @@ get work agreement
 ```bash
 $ yarn --cwd sol npx hardhat lancerWorkAgreements --wid 1 --network sepolia
 ```
->> work agreement: [
+> work agreement: [
     '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
     BigNumber { value: "0" },
     '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
@@ -163,10 +163,10 @@ fetch the content from IPFS and decrypt using the decryption key
 ```bash
 $ curl https://lancer.mypinata.cloud/ipfs/QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq
 ```
->> d87e3eed86bfed5ffae1784705cdc845c4438e97707077cb4897e605cd917012
+> d87e3eed86bfed5ffae1784705cdc845c4438e97707077cb4897e605cd917012
 
 _decrypt with AES_
->> Hello World!
+> Hello World!
 
 ## Chainlink
 
