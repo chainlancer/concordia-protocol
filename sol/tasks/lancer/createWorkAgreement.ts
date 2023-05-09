@@ -14,7 +14,13 @@ task("lancerCreateWorkAgreement", "Create a work agreement")
   .addParam("verifier", "The address of the verifier", DEFAULT_VERIFIER)
   .addParam("cid", "The IPFS CID for the work agreement", DEFAULT_IPFS_CID)
   .addParam("checksum", "The checksum for the work agreement", DEFAULT_CHECKSUM)
-  .addParam("buyer", "The address of the buyer")
+  .addParam(
+    "buyer",
+    "The address of the buyer/client",
+    undefined,
+    undefined,
+    true
+  )
   .setAction(async (args: any, hre: any) => {
     const signer = hre.ethers.provider.getSigner();
 

@@ -74,6 +74,8 @@ import "./tasks/lancer/payWorkAgreement";
 import "./tasks/lancer/updateDecryptionKey";
 import "./tasks/lancer/workAgreements";
 import "./tasks/lancer/workAgreementsCount";
+import "./tasks/lancer/getClientWorkAgreements";
+import "./tasks/lancer/getProprietorWorkAgreements";
 import "./tasks/operator/setAuthorizedSenders";
 
 // TODO: these tasks are not importable because they reference "ethers" which is

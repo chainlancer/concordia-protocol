@@ -82,13 +82,13 @@ $ yarn --cwd sol npx hardhat scripts/lancer/deploy.ts --network sepolia
 $ yarn --cwd sol npx hardhat lancerCreateWorkAgreement --cid IPFS_CID --checksum CHECKSUM --network sepolia
 
 # pay for work agreement
-$ yarn --cwd sol npx hardhat lancerPayWorkAgreement --wid WORK_AGREEMENT_ID --network sepolia
+$ yarn --cwd sol npx hardhat lancerPayWorkAgreement --id WORK_AGREEMENT_ID --network sepolia
 
 # update decryption key for work agreement
 $ yarn --cwd sol npx hardhat lancerUpdateDecryptionKey --network sepolia
 
 # get work agreement by id
-$ yarn --cwd sol npx hardhat lancerWorkAgreements --wid WORK_AGREEMENT_ID --network sepolia
+$ yarn --cwd sol npx hardhat lancerWorkAgreements --id WORK_AGREEMENT_ID --network sepolia
 ```
 
 **try this demo**
@@ -96,7 +96,7 @@ $ yarn --cwd sol npx hardhat lancerWorkAgreements --wid WORK_AGREEMENT_ID --netw
 first, deploy a fresh contract:
 
 ```bash
-$ yarn --cwd sol npx hardhat scripts/lancer/deploy.ts --network sepolia
+$ yarn --cwd sol npx hardhat run scripts/lancer/deploy.ts --network sepolia
 ```
 
 then update the .env with the new contract address.
@@ -122,20 +122,20 @@ $ yarn --cwd sol npx hardhat lancerCreateWorkAgreement --cid QmUq9f7XoCyJDrkXJjg
 next, we can pay for our work agreement
 
 ```bash
-$ yarn --cwd sol npx hardhat lancerPayWorkAgreement --wid 1 --network sepolia
+$ yarn --cwd sol npx hardhat lancerPayWorkAgreement --id 1 --network sepolia
 ```
 
 now that the agreement is paid we can pass in our decryption key to withdraw the funds. note that the default price
 was 0 so there will be no funds in the agreement
 
 ```bash
-$ yarn --cwd sol npx hardhat lancerUpdateDecryptionKey --wid 1 --key 207109403456bdad4a9711d9f40aebff --network sepolia
+$ yarn --cwd sol npx hardhat lancerUpdateDecryptionKey --id 1 --key 207109403456bdad4a9711d9f40aebff --network sepolia
 ```
 
 get work agreement
 
 ```bash
-$ yarn --cwd sol npx hardhat lancerWorkAgreements --wid 1 --network sepolia
+$ yarn --cwd sol npx hardhat lancerWorkAgreements --id 1 --network sepolia
 ```
 > work agreement: [
     '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',

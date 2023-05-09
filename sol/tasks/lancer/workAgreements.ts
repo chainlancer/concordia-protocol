@@ -4,9 +4,9 @@ import { task } from "hardhat/config";
 import { LANCER } from "../../src/consts";
 
 task("lancerWorkAgreements", "Get a work agreement by ID")
-  .addParam("wid", "The ID of the work agreement")
+  .addParam("id", "The ID of the work agreement")
   .setAction(async (args, hre) => {
-    const { wid } = args;
+    const { id } = args;
 
     const signer = hre.ethers.provider.getSigner();
 
@@ -14,6 +14,6 @@ task("lancerWorkAgreements", "Get a work agreement by ID")
 
     const contract = await getDeployedContract(hre, LANCER, lancerAddress);
 
-    const workAgreement = await contract.connect(signer).workAgreements(wid);
+    const workAgreement = await contract.connect(signer).workAgreements(id);
     console.log("work agreement: ", workAgreement);
   });

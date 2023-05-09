@@ -4,16 +4,16 @@ import { task } from "hardhat/config";
 import { LANCER } from "../../src/consts";
 
 task("lancerPayWorkAgreement", "Fetch historical events")
-  .addParam("wid", "Work agreement ID")
+  .addParam("id", "Work agreement ID")
   .setAction(async (args, hre) => {
-    const { wid } = args;
+    const { id } = args;
     const signer = hre.ethers.provider.getSigner();
 
     const { lancerAddress } = config[hre.network.name];
 
     const contract = await getDeployedContract(hre, LANCER, lancerAddress);
 
-    const tx = await contract.connect(signer).payWorkAgreement(wid);
+    const tx = await contract.connect(signer).payWorkAgreement(id);
     console.log("Transaction sent, waiting for it to be mined...");
 
     const receipt = await tx.wait();

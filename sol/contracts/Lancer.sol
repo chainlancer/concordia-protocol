@@ -22,6 +22,22 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
     mapping(uint256 => WorkAgreement) public workAgreements;
     uint256 public workAgreementCount;
 
+    mapping(address => uint256[]) public proprietorWorkAgreements;
+
+    function getProprietorWorkAgreements(
+        address addr
+    ) public view returns (uint256[] memory) {
+        return proprietorWorkAgreements[addr];
+    }
+
+    mapping(address => uint256[]) public clientWorkAgreements;
+
+    function getClientWorkAgreements(
+        address addr
+    ) public view returns (uint256[] memory) {
+        return clientWorkAgreements[addr];
+    }
+
     struct TempData {
         uint256 workAgreementId;
         bytes key;
@@ -139,6 +155,11 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
             decryptionKey: "",
             ipfsCID: _ipfsCID
         });
+
+        // Add work agreement ID to the respective proprietor and client mappings
+        proprietorWorkAgreements[msg.sender].push(workAgreementCount);
+        clientWorkAgreements[_client].push(workAgreementCount);
+
         emit WorkAgreementCreated(workAgreementCount, msg.sender);
     }
 
