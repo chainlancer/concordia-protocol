@@ -96,7 +96,7 @@ $ yarn --cwd sol npx hardhat lancerWorkAgreements --wid WORK_AGREEMENT_ID --netw
 first, deploy a fresh contract:
 
 ```bash
-$ yarn --cwd sol npx hardhat scripts/lancer/deploy.ts --network sepolia
+$ yarn --cwd sol npx hardhat run scripts/lancer/deploy.ts --network sepolia
 ```
 
 then update the .env with the new contract address.
