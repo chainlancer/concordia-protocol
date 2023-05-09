@@ -20,7 +20,6 @@ task("lancerClientGetWorkAgreements", "Get Work Agreements by Client")
     const workAgreementIds = await contractConnection.getClientWorkAgreements(
       client
     );
-    console.log(workAgreementIds);
     const workAgreements = [];
 
     for (const id of workAgreementIds) {
