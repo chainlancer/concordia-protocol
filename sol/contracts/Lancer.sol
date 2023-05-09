@@ -4,38 +4,47 @@ pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
-contract Lancer is ChainlinkClient, ConfirmedOwner {
+// TODO:
+// "work" should be renamed to "deliverable" or something similar
+
+contract Concordia is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
-    struct WorkAgreement {
-        bytes32 checksum;
-        uint256 price;
-        address payable proprietor;
-        address payable client;
-        address payable verifier;
-        bool paid;
-        bool verifierApproved;
-        bytes decryptionKey;
-        string ipfsCID;
+    // TODO:
+    // createdAt and updatedAt can probably use a type smaller than uint256
+    // ipfsWorkCID and ipfsMetadataCID can probably use a type smaller than string
+    struct Concord {
+        uint256 createdAt;
+        uint256 updatedAt;
+        uint96 price;
+        bytes32 checksum; // SHA256 checksum of the work
+        address proprietor; // Proprietor is the creator of the work
+        address client; // Client is the buyer of the work
+        address verifier; // Verifier is the third party that verifies the work
+        bool verifierApproved; // Whether the verifier has approved the work
+        bool paid; // Whether the client has paid for the work
+        bytes decryptionKey; // Decryption key for the work
+        string deliverableIpfsCID; // CID of the encrypted work
+        string metadataIpfsCID; // CID of the agreement metadata
     }
 
-    mapping(uint256 => WorkAgreement) public workAgreements;
-    uint256 public workAgreementCount;
+    mapping(uint256 => Concord) public concords;
+    uint256 public concordCount;
 
-    mapping(address => uint256[]) public proprietorWorkAgreements;
+    mapping(address => uint256[]) private _proprietorConcords;
 
-    function getProprietorWorkAgreements(
+    function proprietorConcords(
         address addr
     ) public view returns (uint256[] memory) {
-        return proprietorWorkAgreements[addr];
+        return _proprietorConcords[addr];
     }
 
-    mapping(address => uint256[]) public clientWorkAgreements;
+    mapping(address => uint256[]) public _clientConcords;
 
-    function getClientWorkAgreements(
+    function clientConcords(
         address addr
     ) public view returns (uint256[] memory) {
-        return clientWorkAgreements[addr];
+        return _clientConcords[addr];
     }
 
     struct TempData {
@@ -51,31 +60,27 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
 
     address public contractOwner;
 
-    event WorkAgreementCreated(
+    event ConcordCreated(
         uint256 indexed workAgreementId,
         address indexed proprietor
     );
-    event WorkAgreementPaid(
-        uint256 indexed workAgreementId,
-        address indexed client
-    );
-    event WorkAgreementVerifierApproved(
+    event ConcordPaid(uint256 indexed workAgreementId, address indexed client);
+    event ConcordApproved(
         uint256 indexed workAgreementId,
         address indexed verifier
     );
-    event WorkAgreementDecryptionKeyUpdated(
+    event ConcordKeyUpdated(
         uint256 indexed workAgreementId,
         bytes decryptionKey
     );
-    event WorkAgreementDecryptionKeyUpdateFailed(
+    event ConcordKeyUpdateFailed(
         uint256 indexed workAgreementId,
         bytes invalidDecryptionKey
     );
-    event FundsWithdrawn(
+    event ConcordFundsWithdrawn(
         uint256 indexed workAgreementId,
         address indexed proprietor
     );
-    event CompareChecksumAndHash(bytes32 checksum, bytes32 hash);
 
     constructor(
         address _oracle,
@@ -136,60 +141,71 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function createWorkAgreement(
-        bytes32 _checksum,
-        uint256 _price,
+    function createConcord(
         address payable _client,
         address payable _verifier,
-        string memory _ipfsCID
+        uint96 _price,
+        bytes32 _checksum,
+        string memory _ipfsWorkCID,
+        string memory _ipfsMetadataCID
     ) public {
-        workAgreementCount++;
-        workAgreements[workAgreementCount] = WorkAgreement({
-            checksum: _checksum,
-            price: _price,
-            proprietor: payable(msg.sender),
+        concordCount++;
+
+        Concord memory wa = Concord({
+            proprietor: msg.sender,
             client: _client,
+            price: _price,
+            deliverableIpfsCID: _ipfsWorkCID,
+            metadataIpfsCID: _ipfsMetadataCID,
+            checksum: _checksum,
             verifier: _verifier,
-            paid: false,
             verifierApproved: _verifier == address(0),
+            paid: false,
             decryptionKey: "",
-            ipfsCID: _ipfsCID
+            createdAt: block.timestamp,
+            updatedAt: block.timestamp
         });
+        concords[concordCount] = wa;
 
         // Add work agreement ID to the respective proprietor and client mappings
-        proprietorWorkAgreements[msg.sender].push(workAgreementCount);
-        clientWorkAgreements[_client].push(workAgreementCount);
+        _proprietorConcords[msg.sender].push(concordCount);
+        _clientConcords[_client].push(concordCount);
 
-        emit WorkAgreementCreated(workAgreementCount, msg.sender);
+        emit ConcordCreated(concordCount, msg.sender);
     }
 
-    function payWorkAgreement(uint256 _workAgreementId) public payable {
-        WorkAgreement storage agreement = workAgreements[_workAgreementId];
+    function payConcord(uint256 _workAgreementId) public payable {
+        Concord storage agreement = concords[_workAgreementId];
         require(msg.value == agreement.price, "Incorrect payment amount");
         agreement.paid = true;
-        emit WorkAgreementPaid(_workAgreementId, msg.sender);
+        agreement.updatedAt = block.timestamp; // Update the updatedAt field
+        emit ConcordPaid(_workAgreementId, msg.sender);
     }
 
-    function approveWorkAgreement(uint256 _workAgreementId) public {
-        WorkAgreement storage agreement = workAgreements[_workAgreementId];
+    function approveConcord(uint256 _workAgreementId) public {
+        Concord storage agreement = concords[_workAgreementId];
         require(
             msg.sender == agreement.verifier,
             "Only the verifier can approve"
         );
         agreement.verifierApproved = true;
-        emit WorkAgreementVerifierApproved(_workAgreementId, msg.sender);
+        agreement.updatedAt = block.timestamp;
+        emit ConcordApproved(_workAgreementId, msg.sender);
     }
 
-    function updateDecryptionKey(
+    function submitKey(
         uint256 _workAgreementId,
         bytes memory _decryptionKey
     ) public {
-        WorkAgreement storage agreement = workAgreements[_workAgreementId];
+        Concord storage agreement = concords[_workAgreementId];
         require(
             msg.sender == agreement.proprietor,
             "Only the proprietor can update the decryption key"
         );
-        bytes32 requestId = fetchWorkHash(agreement.ipfsCID, _decryptionKey);
+        bytes32 requestId = verifyKey(
+            agreement.deliverableIpfsCID,
+            _decryptionKey
+        );
         requestIdToTempData[requestId] = TempData({
             workAgreementId: _workAgreementId,
             key: _decryptionKey
@@ -197,7 +213,7 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
     }
 
     function withdrawFunds(uint256 _workAgreementId) public {
-        WorkAgreement storage agreement = workAgreements[_workAgreementId];
+        Concord storage agreement = concords[_workAgreementId];
         require(
             msg.sender == agreement.proprietor,
             "Only the proprietor can withdraw funds"
@@ -205,12 +221,14 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         require(agreement.paid, "Client has not paid");
         require(agreement.verifierApproved, "Verifier has not approved");
         uint256 amount = agreement.price;
+
         agreement.price = 0;
-        agreement.proprietor.transfer(amount);
-        emit FundsWithdrawn(_workAgreementId, msg.sender);
+        agreement.updatedAt = block.timestamp;
+        payable(agreement.proprietor).transfer(amount);
+        emit ConcordFundsWithdrawn(_workAgreementId, msg.sender);
     }
 
-    function fetchWorkHash(
+    function verifyKey(
         string memory ipfsCID,
         bytes memory decryptionKey
     ) public onlyOwner returns (bytes32 requestId) {
@@ -223,40 +241,23 @@ contract Lancer is ChainlinkClient, ConfirmedOwner {
         requestId = sendChainlinkRequestTo(ORACLE, req, CHAINLINK_FEE);
     }
 
-    function cancelRequest(
-        bytes32 _requestId,
-        uint256 _payment,
-        bytes4 _callbackFunctionId,
-        uint256 _expiration
-    ) public onlyOwner {
-        cancelChainlinkRequest(
-            _requestId,
-            _payment,
-            _callbackFunctionId,
-            _expiration
-        );
-    }
-
-    function fulfillWorkHash(
+    function fulfillVerifyKey(
         bytes32 _requestId,
         bytes32 _hash
     ) public recordChainlinkFulfillment(_requestId) {
         TempData storage tempData = requestIdToTempData[_requestId];
-        WorkAgreement storage agreement = workAgreements[
-            tempData.workAgreementId
-        ];
+        Concord storage agreement = concords[tempData.workAgreementId];
         emit CompareChecksumAndHash(agreement.checksum, _hash);
         if (agreement.checksum == _hash) {
             agreement.decryptionKey = tempData.key;
-            emit WorkAgreementDecryptionKeyUpdated(
+            agreement.updatedAt = block.timestamp;
+            emit ConcordKeyUpdated(
                 tempData.workAgreementId,
                 agreement.decryptionKey
             );
         } else {
-            emit WorkAgreementDecryptionKeyUpdateFailed(
-                tempData.workAgreementId,
-                tempData.key
-            );
+            agreement.updatedAt = block.timestamp;
+            emit ConcordKeyUpdateFailed(tempData.workAgreementId, tempData.key);
         }
         delete requestIdToTempData[_requestId];
     }
