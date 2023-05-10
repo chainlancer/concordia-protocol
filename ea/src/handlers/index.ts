@@ -97,7 +97,10 @@ export const ipfsDecryptAndValidate = (
       // return the bytes
       const res = {
         data: {
-          result: hashBytes,
+          result: {
+            hash: hashBytes,
+            decryptedKey: decryptionKeyHex, // TODO
+          },
         },
         status: response.status,
       };

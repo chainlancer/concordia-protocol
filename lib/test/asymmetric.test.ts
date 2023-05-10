@@ -13,11 +13,12 @@ describe("Asymmetric", () => {
       identity.publicKey,
       INPUT
     );
-    expect(encrypted).to.not.equal(INPUT);
+    const encryptedString = EthCrypto.cipher.stringify(encrypted);
+    expect(encrypted).to.not.equal(encryptedString);
 
     const decrypted = await EthCrypto.decryptWithPrivateKey(
       identity.privateKey,
-      encrypted
+      EthCrypto.cipher.parse(encryptedString)
     );
     expect(decrypted).to.equal(INPUT);
   });

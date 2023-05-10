@@ -22,7 +22,8 @@ task("concordiaSubmitKey", "Submit a decryption key")
 
     const tx = await contract
       .connect(signer)
-      .submitKey(id, ethers.utils.hexZeroPad("0x" + key, 32));
+      .submitKey(id, ethers.utils.hexZeroPad("0x" + key, 128));
+    // .submitKey(id, ethers.utils.hexZeroPad("0x" + key, 32));
     console.log("Transaction sent, waiting for it to be mined...");
 
     const receipt = await tx.wait();

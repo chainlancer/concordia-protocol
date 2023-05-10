@@ -60,13 +60,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         return _buyerConcords[addr];
     }
 
-    // a temporary struct to store the data needed to update the key. this is needed because it would be unsafe
-    // to return the key from the fulfillSubmitKey function
-    struct ConcordKey {
-        uint256 id;
-        bytes key;
-    }
-    mapping(bytes32 => ConcordKey) private requestIdToConcordKey;
+    mapping(bytes32 => uint256) private requestIdToConcordId;
 
     address private oracle;
     string private chainlinkJob;
@@ -181,78 +175,92 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
 
     function pay(uint256 _id) public payable {
         Concord storage c = concords[_id];
+
         require(msg.value == c.price, "Incorrect payment amount");
+
         c.paid = true;
         c.updatedAt = block.timestamp; // Update the updatedAt field
+
         emit Paid(_id, msg.sender);
     }
 
     function approve(uint256 _id) public {
         Concord storage c = concords[_id];
+
         require(msg.sender == c.arbiter, "Only the arbiter can approve");
+
         c.arbiterApproved = true;
         c.updatedAt = block.timestamp;
+
         emit Approved(_id, msg.sender);
     }
 
-    function submitKey(uint256 _id, bytes memory _decryptionKey) public {
+    function submitKey(uint256 _id, bytes memory _encryptedKey) public {
         Concord storage c = concords[_id];
+
         require(
             msg.sender == c.proposer,
-            "Only the proposer can update the decryption key"
+            "Only the proposer can update the key"
         );
-        bytes32 requestId = submitKey(c.deliverableIpfsCID, _decryptionKey);
-        requestIdToConcordKey[requestId] = ConcordKey({
-            id: _id,
-            key: _decryptionKey
-        });
+
+        bytes32 requestId = _submitKey(c.deliverableIpfsCID, _encryptedKey);
+
+        requestIdToConcordId[requestId] = _id;
+    }
+
+    function _submitKey(
+        string memory _ipfsCID,
+        bytes memory _encryptedKey
+    ) private returns (bytes32 requestId) {
+        Chainlink.Request memory req = buildOperatorRequest(
+            stringToBytes32(chainlinkJob),
+            this.fulfillSubmitKey.selector
+        );
+
+        req.add("ipfs_cid", _ipfsCID);
+        req.addBytes("decryption_key", _encryptedKey); // TODO
+
+        requestId = sendChainlinkRequestTo(oracle, req, chainlinkFee);
+    }
+
+    function fulfillSubmitKey(
+        bytes32 _requestId,
+        bytes32 _hash,
+        bytes memory _decryptedKey
+    ) public recordChainlinkFulfillment(_requestId) {
+        uint256 id = requestIdToConcordId[_requestId];
+        Concord storage c = concords[id];
+
+        if (c.checksum != _hash) {
+            emit KeyUpdated(id, _decryptedKey, false);
+            return;
+        }
+
+        c.key = _decryptedKey;
+        c.updatedAt = block.timestamp;
+
+        delete requestIdToConcordId[_requestId];
+
+        emit KeyUpdated(id, c.key, true);
     }
 
     function withdrawFunds(uint256 _id) public {
         Concord storage c = concords[_id];
+
         require(
             msg.sender == c.proposer,
             "Only the proposer can withdraw funds"
         );
         require(c.paid, "Client has not paid");
         require(c.arbiterApproved, "Arbiter has not approved");
+
         uint256 amount = c.price;
 
         c.price = 0;
         c.updatedAt = block.timestamp;
+
         payable(c.proposer).transfer(amount);
+
         emit FundsWithdrawn(_id, msg.sender);
-    }
-
-    function submitKey(
-        string memory ipfsCID,
-        bytes memory decryptionKey
-    ) public onlyOwner returns (bytes32 requestId) {
-        Chainlink.Request memory req = buildOperatorRequest(
-            stringToBytes32(chainlinkJob),
-            this.fulfillSubmitKey.selector
-        );
-        req.add("ipfs_cid", ipfsCID);
-        req.addBytes("decryption_key", decryptionKey);
-        requestId = sendChainlinkRequestTo(oracle, req, chainlinkFee);
-    }
-
-    function fulfillSubmitKey(
-        bytes32 _requestId,
-        bytes32 _hash
-    ) public recordChainlinkFulfillment(_requestId) {
-        ConcordKey storage tempData = requestIdToConcordKey[_requestId];
-        Concord storage c = concords[tempData.id];
-
-        if (c.checksum != _hash) {
-            emit KeyUpdated(tempData.id, tempData.key, false);
-            return;
-        }
-
-        c.key = tempData.key;
-
-        c.updatedAt = block.timestamp;
-        delete requestIdToConcordKey[_requestId];
-        emit KeyUpdated(tempData.id, c.key, true);
     }
 }

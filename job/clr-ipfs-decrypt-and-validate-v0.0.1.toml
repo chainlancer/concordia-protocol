@@ -1,6 +1,6 @@
 type = "directrequest"
 schemaVersion = 1
-name = "clr-ipfs-decrypt-and-validate-v0"
+name = "clr-ipfs-decrypt-and-validate-v0.0.1"
 externalJobID = "6fde68e1-ca75-4a41-b195-e3ea02a892aa"
 forwardingAllowed = false
 maxTaskDuration = "0s"

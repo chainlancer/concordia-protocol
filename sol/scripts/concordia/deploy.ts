@@ -16,7 +16,7 @@ async function main() {
     chainlinkJobID,
     0,
     chainlinkTokenAddress,
-    ethers.utils.hexZeroPad(concordiaPublicKey, 32)
+    ethers.utils.hexZeroPad("0x" + concordiaPublicKey, 64)
   );
 
   await concordia.deployed();
