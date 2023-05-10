@@ -179,37 +179,37 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         emit Created(concordCount, msg.sender);
     }
 
-    function pay(uint256 _concordId) public payable {
-        Concord storage c = concords[_concordId];
+    function pay(uint256 _id) public payable {
+        Concord storage c = concords[_id];
         require(msg.value == c.price, "Incorrect payment amount");
         c.paid = true;
         c.updatedAt = block.timestamp; // Update the updatedAt field
-        emit Paid(_concordId, msg.sender);
+        emit Paid(_id, msg.sender);
     }
 
-    function approve(uint256 _concordId) public {
-        Concord storage c = concords[_concordId];
+    function approve(uint256 _id) public {
+        Concord storage c = concords[_id];
         require(msg.sender == c.arbiter, "Only the arbiter can approve");
         c.arbiterApproved = true;
         c.updatedAt = block.timestamp;
-        emit Approved(_concordId, msg.sender);
+        emit Approved(_id, msg.sender);
     }
 
-    function submitKey(uint256 _concordId, bytes memory _decryptionKey) public {
-        Concord storage c = concords[_concordId];
+    function submitKey(uint256 _id, bytes memory _decryptionKey) public {
+        Concord storage c = concords[_id];
         require(
             msg.sender == c.proposer,
             "Only the proposer can update the decryption key"
         );
         bytes32 requestId = submitKey(c.deliverableIpfsCID, _decryptionKey);
         requestIdToConcordKey[requestId] = ConcordKey({
-            id: _concordId,
+            id: _id,
             key: _decryptionKey
         });
     }
 
-    function withdrawFunds(uint256 _concordId) public {
-        Concord storage c = concords[_concordId];
+    function withdrawFunds(uint256 _id) public {
+        Concord storage c = concords[_id];
         require(
             msg.sender == c.proposer,
             "Only the proposer can withdraw funds"
@@ -221,7 +221,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         c.price = 0;
         c.updatedAt = block.timestamp;
         payable(c.proposer).transfer(amount);
-        emit FundsWithdrawn(_concordId, msg.sender);
+        emit FundsWithdrawn(_id, msg.sender);
     }
 
     function submitKey(
