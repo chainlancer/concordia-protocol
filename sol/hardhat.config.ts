@@ -67,20 +67,20 @@ const config: HardhatUserConfig = {
 };
 
 // TODO: is there a less tedious way to import these tasks?
-import "./tasks/lancer/test";
-import "./tasks/lancer/createWorkAgreement";
-import "./tasks/lancer/fetchEvents";
-import "./tasks/lancer/payWorkAgreement";
-import "./tasks/lancer/updateDecryptionKey";
-import "./tasks/lancer/workAgreements";
-import "./tasks/lancer/workAgreementsCount";
-import "./tasks/lancer/getClientWorkAgreements";
-import "./tasks/lancer/getProprietorWorkAgreements";
+// import "./tasks/concordia/test";
+import "./tasks/concordia/create";
+import "./tasks/concordia/events";
+import "./tasks/concordia/pay";
+import "./tasks/concordia/submitKey";
+import "./tasks/concordia/byId";
+import "./tasks/concordia/count";
+import "./tasks/concordia/byBuyer";
+import "./tasks/concordia/byProposer";
 import "./tasks/operator/setAuthorizedSenders";
 
 // TODO: these tasks are not importable because they reference "ethers" which is
 // not available in the tasks/ folder.  This is a limitation of the hardhat tasks
-// import "./tasks/lancer/deploy";
+// import "./tasks/concordia/deploy";
 // import "./tasks/operator/deploy";
 
 export default config;

@@ -58,7 +58,7 @@ export const ipfsDecryptAndValidate = (
   // console.log(decryptionKeyHex);
 
   // fetch the data from ipfs
-  const url = `https://lancer.mypinata.cloud/ipfs/${ipfs_cid}`;
+  const url = `https://concordia.mypinata.cloud/ipfs/${ipfs_cid}`;
   const params = {};
   const config = {
     url,

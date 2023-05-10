@@ -44,8 +44,8 @@ sol-compile:
 sol-operator-deploy-sepolia:
 	cd sol && npx hardhat run scripts/operator/deploy.ts --network sepolia
 
-sol-lancer-deploy-sepolia:
-	cd sol && npx hardhat run scripts/lancer/deploy.ts --network sepolia
+sol-concordia-deploy-sepolia:
+	cd sol && npx hardhat run scripts/concordia/deploy.ts --network sepolia
 
 # lib
 

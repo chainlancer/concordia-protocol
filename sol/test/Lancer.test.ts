@@ -5,14 +5,14 @@ import { expect } from "chai";
 import config from "../../config";
 import { getDeployedContract } from "../src/utils";
 
-describe("Lancer", () => {
-  let lancerContract: Contract;
+describe("Concordia", () => {
+  let concordiaContract: Contract;
   let owner: Signer;
   let client: Signer;
   let verifier = "0x0000000000000000000000000000000000000000";
-  let workAgreementID: any;
+  let concordID: any;
 
-  const { lancerAddress } = config[hre.network.name];
+  const { concordiaAddress } = config[hre.network.name];
 
   // test params
   const ipfsCID = "QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi";
@@ -24,12 +24,16 @@ describe("Lancer", () => {
   beforeEach(async () => {
     [owner, client] = await ethers.getSigners();
 
-    lancerContract = await getDeployedContract(hre, "Lancer", lancerAddress);
+    concordiaContract = await getDeployedContract(
+      hre,
+      "Concordia",
+      concordiaAddress
+    );
   });
 
   it("create work agreement", async () => {
     // create work agreement
-    let tx = await lancerContract
+    let tx = await concordiaContract
       .connect(owner)
       .createWorkAgreement(
         agreementChecksum,
@@ -43,11 +47,11 @@ describe("Lancer", () => {
     console.log(res.events);
 
     // get id of created work agreement
-    const workAgreementCount = await lancerContract.workAgreementCount();
-    workAgreementID = workAgreementCount.toNumber();
-    console.log("work agreement id: ", workAgreementID);
+    const concordCount = await concordiaContract.concordCount();
+    concordID = concordCount.toNumber();
+    console.log("work agreement id: ", concordID);
 
-    const agreement = await lancerContract.workAgreements(workAgreementID);
+    const agreement = await concordiaContract.concords(concordID);
     console.log("work agreement: ", agreement);
 
     expect(agreement.checksum).to.equal(agreementChecksum);
@@ -61,23 +65,23 @@ describe("Lancer", () => {
 
   it("pay for new work agreement", async () => {
     // pay work agreement
-    let tx = await lancerContract
+    let tx = await concordiaContract
       .connect(owner)
-      .payWorkAgreement(workAgreementID, { value: agreementPrice });
+      .payWorkAgreement(concordID, { value: agreementPrice });
     let res = await tx.wait();
     console.log(res.events);
 
-    const agreement = await lancerContract.workAgreements(workAgreementID);
+    const agreement = await concordiaContract.concords(concordID);
     expect(agreement.paid).to.equal(true);
   });
 
   it("update decryption key for new work agreement", async () => {
-    const workAgreementCount = await lancerContract.workAgreementCount();
-    workAgreementID = workAgreementCount.toNumber();
+    const concordCount = await concordiaContract.concordCount();
+    concordID = concordCount.toNumber();
 
-    let tx = await lancerContract
+    let tx = await concordiaContract
       .connect(owner)
-      .updateDecryptionKey(workAgreementID, agreementDecryptionKey);
+      .updateDecryptionKey(concordID, agreementDecryptionKey);
 
     let res = await tx.wait();
     console.log(res.events);

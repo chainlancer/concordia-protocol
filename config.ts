@@ -9,7 +9,9 @@ const config: any = {
     chainlinkNodeAddress: process.env.CHAINLINK_NODE_ADDRESS_SEPOLIA,
     chainlinkOperatorAddress: process.env.CHAINLINK_OPERATOR_ADDRESS_SEPOLIA,
     chainlinkJobID: process.env.CHAINLINK_JOB_ID_SEPOLIA,
-    lancerAddress: process.env.LANCER_ADDRESS_SEPOLIA,
+    concordiaAddress: process.env.CONCORDIA_ADDRESS_SEPOLIA,
+    concordiaPublicKey: process.env.CONCORDIA_PUBLIC_KEY_SEPOLIA,
+    concordiaPrivateKey: process.env.CONCORDIA_PRIVATE_KEY_SEPOLIA,
   },
 };
 

@@ -1,7 +1,7 @@
 
 ## POSTGRES
 
-helm install clr-ea bitnami/postgresql                          kube lancer
+helm install clr-ea bitnami/postgresql                          kube concordia
 
 NAME: clr-ea
 LAST DEPLOYED: Sun Apr 30 14:19:22 2023

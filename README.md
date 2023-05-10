@@ -1,15 +1,15 @@
-# Lancer Solidity Contracts
-Lancer is a decentralized protocol leveraging blockchain technology to enable trustless atomic swaps of digital work between workers and clients.
+# Concordia Solidity Contracts
+Concordia is a decentralized protocol leveraging blockchain technology to enable trustless atomic swaps of digital work between workers and clients.
 
 ## Overview
 
-_a high level overview of Lancer's architecture_
+_a high level overview of Concordia's architecture_
 
 ### How?
 
-The freelancer (proprietor) completes the work and creates an encrypted work bundle (W) by combining the decryption key (k), client's wallet public key (p), and the work bundle (w). The encrypted work bundle is then uploaded to the InterPlanetary File System (IPFS).
+The freeconcordia (proprietor) completes the work and creates an encrypted work bundle (W) by combining the decryption key (k), client's wallet public key (p), and the work bundle (w). The encrypted work bundle is then uploaded to the InterPlanetary File System (IPFS).
 
-Once the client pays the contract in full, the freelancer provides the contract with the decryption key (k).
+Once the client pays the contract in full, the freeconcordia provides the contract with the decryption key (k).
 
 The smart contract calls a Chainlink External Adapter (EA) to fetch the encrypted work bundle (W) from IPFS.
 
@@ -17,11 +17,11 @@ The Chainlink EA uses the decryption key (k) to unwrap the encrypted work bundle
 
 The Chainlink EA then hashes the work package (w_p) using the SHA3-256 algorithm and returns the result (H(w_p)) to the smart contract.
 
-The smart contract compares the work agreement checksum (c) with the hashed work package (H(w_p)). If the two values match, the key is accepted, and the agreement is marked as "paid."
+The smart contract compares the concord checksum (c) with the hashed work package (H(w_p)). If the two values match, the key is accepted, and the agreement is marked as "paid."
 
 The client can decrypt the encrypted work bundle (W) using the decryption key (k) and their wallet public key (p) to obtain the completed work (w).
 
-This process ensures the protection of both parties, with payment released only when the work is completed as agreed upon. The integration with Chainlink allows the Lancer protocol to securely and reliably fetch and process off-chain data, further enhancing its functionality and security.
+This process ensures the protection of both parties, with payment released only when the work is completed as agreed upon. The integration with Chainlink allows the Concordia protocol to securely and reliably fetch and process off-chain data, further enhancing its functionality and security.
 
 **or as notation**
 
@@ -45,7 +45,7 @@ This process ensures the protection of both parties, with payment released only 
 - D is the decryption function
 - w_p is the work package containing the original work and the client's public key
 - H is the SHA3-256 hash function
-- c is the work agreement checksum
+- c is the concord checksum
 
 ## Development
 
@@ -56,7 +56,7 @@ _all of our testing will be done on the sepolia testnet since it is cumbersome t
 the following contracts must be deployed:
 
 - [Operator](#operator)
-- [Lancer](#lancer)
+- [Concordia](#concordia)
 
 #### Operator
 
@@ -70,25 +70,25 @@ $ yarn --cwd sol npx hardhat run scripts/operator/deploy.ts --network sepolia
 $ yarn --cwd sol npx hardhat operatorSetAuthorizedSenders --network sepolia
 ```
 
-#### Lancer
+#### Concordia
 
-_The Lancer contract facilitates the creation, payment, approval, and updates of work agreements._
+_The Concordia contract facilitates the creation, payment, approval, and updates of concords._
 
 ```bash
-# deploy lancer contract
-$ yarn --cwd sol npx hardhat scripts/lancer/deploy.ts --network sepolia
+# deploy concordia contract
+$ yarn --cwd sol npx hardhat scripts/concordia/deploy.ts --network sepolia
 
-# create work agreement
-$ yarn --cwd sol npx hardhat lancerCreateWorkAgreement --cid IPFS_CID --checksum CHECKSUM --network sepolia
+# create concord
+$ yarn --cwd sol npx hardhat concordiaNew --cid IPFS_CID --checksum CHECKSUM --network sepolia
 
-# pay for work agreement
-$ yarn --cwd sol npx hardhat lancerPayWorkAgreement --id WORK_AGREEMENT_ID --network sepolia
+# pay for concord
+$ yarn --cwd sol npx hardhat concordiaPay --id WORK_AGREEMENT_ID --network sepolia
 
-# update decryption key for work agreement
-$ yarn --cwd sol npx hardhat lancerUpdateDecryptionKey --network sepolia
+# update decryption key for concord
+$ yarn --cwd sol npx hardhat concordiaSubmitKey --network sepolia
 
-# get work agreement by id
-$ yarn --cwd sol npx hardhat lancerWorkAgreements --id WORK_AGREEMENT_ID --network sepolia
+# get concord by id
+$ yarn --cwd sol npx hardhat concordiaById --id WORK_AGREEMENT_ID --network sepolia
 ```
 
 **try this demo**
@@ -96,7 +96,7 @@ $ yarn --cwd sol npx hardhat lancerWorkAgreements --id WORK_AGREEMENT_ID --netwo
 first, deploy a fresh contract:
 
 ```bash
-$ yarn --cwd sol npx hardhat run scripts/lancer/deploy.ts --network sepolia
+$ yarn --cwd sol npx hardhat run scripts/concordia/deploy.ts --network sepolia
 ```
 
 then update the .env with the new contract address.
@@ -112,32 +112,32 @@ use AES encoding to encode your content with our key, "207109403456bdad4a9711d9f
 pin encrypted content on IPFS and get CID
 > CID: QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq
 
-okay now we can create a work agreement. note that default buyer is work agreement creator and default price is 0
+okay now we can create a concord. note that default buyer is concord creator and default price is 0
 
 ```bash
-$ yarn --cwd sol npx hardhat lancerCreateWorkAgreement --cid QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq --checksum d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af --network sepolia
+$ yarn --cwd sol npx hardhat concordiaNew --cid QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq --checksum d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af --network sepolia
 ```
-> work agreement id: 1
+> concord id: 1
 
-next, we can pay for our work agreement
+next, we can pay for our concord
 
 ```bash
-$ yarn --cwd sol npx hardhat lancerPayWorkAgreement --id 1 --network sepolia
+$ yarn --cwd sol npx hardhat concordiaPay --id 1 --network sepolia
 ```
 
 now that the agreement is paid we can pass in our decryption key to withdraw the funds. note that the default price
 was 0 so there will be no funds in the agreement
 
 ```bash
-$ yarn --cwd sol npx hardhat lancerUpdateDecryptionKey --id 1 --key 207109403456bdad4a9711d9f40aebff --network sepolia
+$ yarn --cwd sol npx hardhat concordiaSubmitKey --id 1 --key 207109403456bdad4a9711d9f40aebff --network sepolia
 ```
 
-get work agreement
+get concord
 
 ```bash
-$ yarn --cwd sol npx hardhat lancerWorkAgreements --id 1 --network sepolia
+$ yarn --cwd sol npx hardhat concordiaById --id 1 --network sepolia
 ```
-> work agreement: [
+> concord: [
     '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
     BigNumber { value: "0" },
     '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
@@ -161,7 +161,7 @@ $ yarn --cwd sol npx hardhat lancerWorkAgreements --id 1 --network sepolia
 fetch the content from IPFS and decrypt using the decryption key
 
 ```bash
-$ curl https://lancer.mypinata.cloud/ipfs/QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq
+$ curl https://concordia.mypinata.cloud/ipfs/QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq
 ```
 > d87e3eed86bfed5ffae1784705cdc845c4438e97707077cb4897e605cd917012
 
@@ -223,7 +223,7 @@ $ kubectl port-forward --namespace default svc/clr-ea-pg-postgresql 5432:5432 & 
 
 #### External Adapter
 
-_the external adapter is an API service that fetches work bundles from IPFS, decodes them using a provided secret key, and finally returns a hash to the contract that can be used to compare against the work agreement's checksum_
+_the external adapter is an API service that fetches work bundles from IPFS, decodes them using a provided secret key, and finally returns a hash to the contract that can be used to compare against the concord's checksum_
 
 ##### Deployment
 
