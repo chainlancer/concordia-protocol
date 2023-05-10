@@ -1,5 +1,5 @@
 import { expect, assert } from "chai";
-import { decrypt, encrypt } from "../src/aes";
+import { aesDecrypt, aesEncrypt } from "../src/aes";
 import { randomBytes } from "crypto";
 
 const generateRandomHexKey = (length: number): string => {
@@ -15,11 +15,11 @@ describe("AES", () => {
     console.log("key", key);
 
     // encrypt should return a different string
-    const encrypted = encrypt(INPUT, key);
+    const encrypted = aesEncrypt(INPUT, key);
     expect(encrypted).to.not.equal(INPUT);
 
     // decrypt should return the original input
-    const decrypted = decrypt(encrypted, key);
+    const decrypted = aesDecrypt(encrypted, key);
     expect(decrypted).to.equal(INPUT);
   });
 
@@ -28,12 +28,12 @@ describe("AES", () => {
       invalidKey = generateRandomHexKey(16);
 
     // encrypt should return a different string
-    const encrypted = encrypt(INPUT, key);
+    const encrypted = aesEncrypt(INPUT, key);
     console.log("encrypted: \n", encrypted);
     expect(encrypted).to.not.equal(INPUT);
 
     assert.throws(() => {
-      decrypt(encrypted, invalidKey);
+      aesDecrypt(encrypted, invalidKey);
     }, ERROR_BAD_DECRYPT);
   });
 });

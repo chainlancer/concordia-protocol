@@ -231,7 +231,8 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         uint256 id = requestIdToConcordId[_requestId];
         Concord storage c = concords[id];
 
-        if (c.checksum != _hash) {
+        bytes32 checksum = keccak256(abi.encodePacked(_hash, _decryptedKey));
+        if (checksum != c.checksum) {
             emit KeyUpdated(id, _decryptedKey, false);
             return;
         }
