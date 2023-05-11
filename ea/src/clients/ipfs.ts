@@ -8,7 +8,7 @@ const IPFS_HOST = "https://gateway.ipfs.io/ipfs";
 // Function to make a GET request using fetch to fetch a file from a private IPFS gateway
 export async function fetchDataFromIPFS(hash: string) {
   try {
-    const url = `${IPFS_HOST}/${hash}`;
+    const url = `${IPFS_HOST}/ipfs/${hash}`;
 
     // const response = await fetch(url, {
     //   headers: {

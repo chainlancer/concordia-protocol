@@ -18,7 +18,9 @@ import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 ///        only if the hash matches the one stored in the contract. the external adapter doesn't really expose anything if
 ///        it is compromised. they would need to know the private key of the buyer to decrypt the deliverable
 ///
-///
+/// deploy a cluster of contracts to make it more secure?
+
+/// with this refactor, we can simply encrypt the key with the public key of the contract as well as the deliverable
 
 contract Concordia is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
@@ -44,20 +46,20 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
     mapping(uint256 => Concord) public concords;
     uint256 public concordCount;
 
-    mapping(address => uint256[]) private _proposerConcords;
+    mapping(address => uint256[]) private _proposerConcordIds;
 
-    function proposerConcords(
+    function proposerConcordIds(
         address addr
     ) public view returns (uint256[] memory) {
-        return _proposerConcords[addr];
+        return _proposerConcordIds[addr];
     }
 
-    mapping(address => uint256[]) public _buyerConcords;
+    mapping(address => uint256[]) public _buyerConcordIds;
 
-    function buyerConcords(
+    function buyerConcordIds(
         address addr
     ) public view returns (uint256[] memory) {
-        return _buyerConcords[addr];
+        return _buyerConcordIds[addr];
     }
 
     mapping(bytes32 => uint256) private requestIdToConcordId;
@@ -66,7 +68,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
     string private chainlinkJob;
     uint256 private chainlinkFee;
     address private chainlinkToken;
-    bytes public publicKey; //
+    bytes public publicKey;
     address public contractOwner;
 
     event Created(uint256 indexed concordId, address indexed proposer);
@@ -78,6 +80,13 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         bool success
     );
     event FundsWithdrawn(uint256 indexed concordId, address indexed proposer);
+
+    // TESTING
+    event ExternalAdapterArgs(
+        bytes32 indexed hash,
+        bytes indexed key,
+        bytes32 indexed checksum
+    );
 
     constructor(
         address _oracle,
@@ -167,8 +176,8 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         concords[concordCount] = wa;
 
         // Add work c ID to the respective proposer and buyer mappings
-        _proposerConcords[msg.sender].push(concordCount);
-        _buyerConcords[_buyer].push(concordCount);
+        _proposerConcordIds[msg.sender].push(concordCount);
+        _buyerConcordIds[_buyer].push(concordCount);
 
         emit Created(concordCount, msg.sender);
     }
@@ -232,6 +241,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         Concord storage c = concords[id];
 
         bytes32 checksum = keccak256(abi.encodePacked(_hash, _decryptedKey));
+        emit ExternalAdapterArgs(_hash, _decryptedKey, checksum);
         if (checksum != c.checksum) {
             emit KeyUpdated(id, _decryptedKey, false);
             return;

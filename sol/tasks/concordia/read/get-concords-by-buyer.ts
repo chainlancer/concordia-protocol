@@ -1,10 +1,10 @@
-import config from "../../../config";
-import { getDeployedContract } from "../../src/utils";
+import config from "../../../../config";
+import { getDeployedContract } from "../../../src/utils";
 import { task } from "hardhat/config";
-import { CONCORDIA } from "../../src/consts";
+import { CONCORDIA } from "../../../src/consts";
 
-task("concordiaBuyerConcords", "Get concords by buyer")
-  .addParam("address", "Buyer address")
+task("get-concords-by-buyer", "Get concords by buyer")
+  .addParam("address", "Proposer address", undefined, undefined, true)
   .setAction(async (args, hre) => {
     const signer = hre.ethers.provider.getSigner();
 
@@ -21,7 +21,7 @@ task("concordiaBuyerConcords", "Get concords by buyer")
     );
     const contractConnection = contract.connect(signer);
 
-    const concordIds = await contractConnection.buyerConcords(client);
+    const concordIds = await contractConnection.buyerConcordIds(client);
     const concords = [];
 
     for (const id of concordIds) {

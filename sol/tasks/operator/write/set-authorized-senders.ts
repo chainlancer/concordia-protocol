@@ -1,10 +1,10 @@
-import config from "../../../config";
-import { getDeployedContract } from "../../src/utils";
+import config from "../../../../config";
+import { getDeployedContract } from "../../../src/utils";
 import { task } from "hardhat/config";
-import { OPERATOR } from "../../src/consts";
+import { OPERATOR } from "../../../src/consts";
 
 task(
-  "operatorSetAuthorizedSenders",
+  "set-authorized-senders",
   "Set Chainlink Node Address as authorized sender"
 )
   // .addParam("address", "Sender address", chainlinkNodeAddress)

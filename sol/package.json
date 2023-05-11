@@ -4,8 +4,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "test": "npx hardhat test",
-    "hardhat": "hardhat"
+    "hardhat": "npx hardhat",
+    "deploy-concordia": "yarn hardhat run scripts/concordia/deploy.ts",
+    "deploy-operator": "yarn hardhat run scripts/operator/deploy.ts"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.3",

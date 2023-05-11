@@ -23,17 +23,13 @@ export const aesEncrypt = (text: string, key: string): string => {
 };
 
 export const aesDecrypt = (encrypted: string, key: string): string => {
-  // const err = validateKeyLength(key);
-  // if (err) throw new Error(err.message);
-
-  const iv = Buffer.from(encrypted.slice(0, 255), "hex");
-  const data = encrypted.slice(255);
+  const iv = Buffer.from(encrypted.slice(0, 32), "hex");
+  const data = encrypted.slice(32);
   const decipher = crypto.createDecipheriv(
-    CYPHER_KEY,
+    "aes-128-cbc",
     Buffer.from(key, "hex"),
     iv
   );
-
   let decrypted = decipher.update(data, "hex", "utf8");
   decrypted += decipher.final("utf8");
 

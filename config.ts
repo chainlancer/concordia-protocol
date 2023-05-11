@@ -20,22 +20,22 @@ const config: any = {
   },
 };
 
-if (!config.ipfs.host || !config.ipfs.apiKey) {
-  throw new Error("Missing IPFS configuration");
-}
+// if (!config.ipfs.host || !config.ipfs.apiKey) {
+//   throw new Error("Missing IPFS configuration");
+// }
 
-// Sepolia
-if (
-  !config.sepolia.providerURL ||
-  !config.sepolia.chainlinkTokenAddress ||
-  !config.sepolia.chainlinkNodeAddress ||
-  !config.sepolia.chainlinkOperatorAddress ||
-  !config.sepolia.chainlinkJobID ||
-  !config.sepolia.concordiaAddress ||
-  !config.sepolia.concordiaPublicKey ||
-  !config.sepolia.concordiaPrivateKey
-) {
-  throw new Error("Missing Sepolia configuration");
-}
+// // sepolia
+// if (
+//   !config.sepolia.providerURL ||
+//   !config.sepolia.chainlinkTokenAddress ||
+//   !config.sepolia.chainlinkNodeAddress ||
+//   !config.sepolia.chainlinkOperatorAddress ||
+//   !config.sepolia.chainlinkJobID ||
+//   !config.sepolia.concordiaAddress ||
+//   !config.sepolia.concordiaPublicKey ||
+//   !config.sepolia.concordiaPrivateKey
+// ) {
+//   throw new Error("Missing Sepolia configuration");
+// }
 
 export default config;

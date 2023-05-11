@@ -1,12 +1,12 @@
 import { ethers } from "ethers";
-import config from "../../../config";
-import { getDeployedContract } from "../../src/utils";
+import config from "../../../../config";
+import { getDeployedContract } from "../../../src/utils";
 import { task } from "hardhat/config";
-import { CONCORDIA } from "../../src/consts";
+import { CONCORDIA } from "../../../src/consts";
 
-task("concordiaSubmitKey", "Submit a decryption key")
+task("submit-key", "Submit a key")
   .addParam("id", "ID of the concord")
-  .addParam("key", "The public key encrypted decryption key")
+  .addParam("key", "The public key encrypted key")
   .setAction(async (args, hre) => {
     const { id, key } = args;
 
@@ -22,7 +22,7 @@ task("concordiaSubmitKey", "Submit a decryption key")
 
     const tx = await contract
       .connect(signer)
-      .submitKey(id, ethers.utils.hexZeroPad("0x" + key, 128));
+      .submitKey(id, ethers.utils.hexZeroPad("0x" + key, 256));
     // .submitKey(id, ethers.utils.hexZeroPad("0x" + key, 32));
     console.log("Transaction sent, waiting for it to be mined...");
 

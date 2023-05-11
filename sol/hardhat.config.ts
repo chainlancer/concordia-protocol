@@ -55,6 +55,7 @@ const config: HardhatUserConfig = {
           : [],
     },
   },
+  defaultNetwork: "sepolia",
   gasReporter: {
     currency: "USD",
     enabled: true,
@@ -66,17 +67,18 @@ const config: HardhatUserConfig = {
   },
 };
 
-// TODO: is there a less tedious way to import these tasks?
-// import "./tasks/concordia/test";
-import "./tasks/concordia/create";
-import "./tasks/concordia/events";
-import "./tasks/concordia/pay";
-import "./tasks/concordia/submitKey";
-import "./tasks/concordia/byId";
-import "./tasks/concordia/count";
-import "./tasks/concordia/byBuyer";
-import "./tasks/concordia/byProposer";
-import "./tasks/operator/setAuthorizedSenders";
+// concordia
+import "./tasks/concordia/read/get-events";
+import "./tasks/concordia/read/get-concords-by-id";
+import "./tasks/concordia/read/get-concords-count";
+import "./tasks/concordia/read/get-concords-by-buyer";
+import "./tasks/concordia/read/get-concords-by-proposer";
+import "./tasks/concordia/write/create";
+import "./tasks/concordia/write/pay";
+import "./tasks/concordia/write/submit-key";
+
+// operator
+import "./tasks/operator/write/set-authorized-senders";
 
 // TODO: these tasks are not importable because they reference "ethers" which is
 // not available in the tasks/ folder.  This is a limitation of the hardhat tasks

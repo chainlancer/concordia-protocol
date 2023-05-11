@@ -1,9 +1,10 @@
 export const DEFAULT_ARBITER = "0x0000000000000000000000000000000000000000";
 export const DEFAULT_DELIVERABLE_IPFS_CID =
-  "QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi";
+  "QmdDkLKxi21eragtCmSdLyMPEJDDYC2LKTs3cgk8DyDwjn";
 export const DEFAULT_METADATA_IPFS_CID =
   "QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi";
-export const DEFAULT_CHECKSUM = "0x1234";
+export const DEFAULT_CHECKSUM =
+  "d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af";
 export const DEFAULT_PRICE = "0.0";
 export const CONCORDIA = "Concordia";
 export const OPERATOR = "Operator";

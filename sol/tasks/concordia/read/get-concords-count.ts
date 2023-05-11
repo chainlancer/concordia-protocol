@@ -1,9 +1,9 @@
-import config from "../../../config";
-import { getDeployedContract } from "../../src/utils";
+import config from "../../../../config";
+import { getDeployedContract } from "../../../src/utils";
 import { task } from "hardhat/config";
-import { CONCORDIA } from "../../src/consts";
+import { CONCORDIA } from "../../../src/consts";
 
-task("concordiaConcordsCount", "Get concords count").setAction(
+task("get-concords-count", "Get concords count").setAction(
   async (args, hre) => {
     const { concordiaAddress } = config[hre.network.name];
 

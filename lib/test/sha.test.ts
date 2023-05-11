@@ -10,7 +10,6 @@ describe("SHA", () => {
       "9cc5e0debb5158df6d7bfc3caccaf19d881d6d8fd20f8075716f89e85f742b3e";
 
     const hash = encodeSHA3(fileContents);
-    console.log(hash);
     expect(hash).to.equal(checksum);
   });
 
@@ -21,10 +20,9 @@ describe("SHA", () => {
       "d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af";
 
     const hash = encodeSHA3(fileContents);
-    console.log(hash);
 
-    const bytes = arrayify("0x" + hash);
-    console.log(bytes);
+    // const bytes = arrayify("0x" + hash);
+    // console.log(bytes);
 
     expect(hash).to.equal(checksum);
   });

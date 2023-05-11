@@ -1,5 +1,5 @@
 service := clr-ea-services
-version := 0.0.31
+version := 0.0.38
 gcloud_proj_id := chainlancer-384913
 cluster := chainlancer
 gcr-image := gcr.io/${gcloud_proj_id}/${service}:${version}
@@ -27,14 +27,13 @@ bumpversion-major:
 # ea
 
 ea-build:
-	yarn --cwd ea build
+	yarn ea build
 
 ea-dev:
-	make ea-build
-	yarn --cwd ea start
+	yarn ea dev
 
 ea-test:
-	yarn --cwd ea test
+	yarn ea test
 
 # sol
 

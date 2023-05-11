@@ -1,9 +1,9 @@
-import config from "../../../config";
-import { getDeployedContract } from "../../src/utils";
+import config from "../../../../config";
+import { getDeployedContract } from "../../../src/utils";
 import { task } from "hardhat/config";
-import { CONCORDIA } from "../../src/consts";
+import { CONCORDIA } from "../../../src/consts";
 
-task("concordiaEvents", "Fetch historical events")
+task("get-events", "Fetch historical events")
   .addParam("event", "The name of the event to fetch")
   .setAction(async (args, hre) => {
     const { event } = args;

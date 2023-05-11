@@ -1,10 +1,8 @@
 import { Requester, Validator } from "@chainlink/external-adapter";
-import { encodeSHA3 } from "../../../lib/src/sha";
+import { encodeKeccak } from "../../../lib/src/keccak";
 import { ethers } from "ethers";
 import { aesDecrypt } from "../../../lib/src/aes";
 import { decryptWithPrivateKey } from "../../../lib/src/asymmetric";
-import eaConfig from "../config";
-import config from "../../../config";
 
 interface CustomParams {
   decryption_key: string[];
@@ -39,7 +37,10 @@ export const ipfsDecryptAndValidate = async (
   // const jobRunID = validator.validated.id;
   // const decryption_key = validator.validated.data.decryption_key;
 
-  const { concordiaPrivateKey } = config[eaConfig.NETWORK];
+  // TODO:
+  // const { concordiaPrivateKey } = config[eaConfig.NETWORK];
+  const concordiaPrivateKey =
+    "0x2abeb8d87ce8cd0325068de54b448d4b492524028fd398445d0cf66cbfa3f5f6";
 
   const jobRunID = input.id;
   const { ipfs_cid, decryption_key: encrypted_key } = input.data;
@@ -76,7 +77,7 @@ export const ipfsDecryptAndValidate = async (
   );
 
   // fetch the data from ipfs
-  const url = `${config.ipfs.host}/${ipfs_cid}`;
+  const url = `https://concordia.mypinata.cloud/ipfs/${ipfs_cid}`;
   const params = {};
   const requestConfig = {
     url,
@@ -96,7 +97,8 @@ export const ipfsDecryptAndValidate = async (
       // attempt to decrypt with the hex representation of the decryption key. return 500 if it fails
       let decryptedData = null;
       try {
-        decryptedData = aesDecrypt(data.trim(), encryptedKeyHex);
+        console.log(data.trim(), decryptedKey);
+        decryptedData = aesDecrypt(data.trim(), decryptedKey);
         console.log("decrypted: \n", decryptedData);
       } catch (error) {
         console.log("error: \n", error);
@@ -106,18 +108,21 @@ export const ipfsDecryptAndValidate = async (
       }
 
       // hash the decrypted data
-      const hash = encodeSHA3(decryptedData);
+      const hash = encodeKeccak(decryptedData);
 
       // convert the hash to bytes
       const hashBytes = ethers.utils.hexZeroPad("0x" + hash, 32);
       console.log("hash as bytes:", hashBytes);
+
+      const keyBytes = ethers.utils.hexZeroPad("0x" + decryptedKey, 32);
+      console.log("key as bytes:", keyBytes);
 
       // return the bytes
       const res = {
         data: {
           result: {
             hash: hashBytes,
-            decryptedKey: encryptedKeyHex, // TODO
+            decryptedKey: keyBytes, // TODO
           },
         },
         status: response.status,

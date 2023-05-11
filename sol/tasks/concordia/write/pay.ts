@@ -1,9 +1,9 @@
-import config from "../../../config";
-import { getDeployedContract } from "../../src/utils";
+import config from "../../../../config";
+import { getDeployedContract } from "../../../src/utils";
 import { task } from "hardhat/config";
-import { CONCORDIA } from "../../src/consts";
+import { CONCORDIA } from "../../../src/consts";
 
-task("concordiaPay", "Pay for a concord")
+task("pay", "Pay for a concord")
   .addParam("id", "Concord ID")
   .setAction(async (args, hre) => {
     const { id } = args;
