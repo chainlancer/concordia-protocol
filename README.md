@@ -7,45 +7,62 @@ _a high level overview of Concordia's architecture_
 
 ### How?
 
-The freeconcordia (proprietor) completes the work and creates an encrypted work bundle (W) by combining the decryption key (k), client's wallet public key (p), and the work bundle (w). The encrypted work bundle is then uploaded to the InterPlanetary File System (IPFS).
+#### Creating a Concord
 
-Once the client pays the contract in full, the freeconcordia provides the contract with the decryption key (k).
+To create an encrypted deliverable (w_k) the proprietor uses AES encryption along with a 32-byte secret key (k) and the deliverable (w). It is recommended that w is encrypted with the public key of the client **prior to encrypting it with the secret key.** Although this step isn't exactly necessary, it prevents others from decrypting its contents after the key is submitted.
 
-The smart contract calls a Chainlink External Adapter (EA) to fetch the encrypted work bundle (W) from IPFS.
+W is pinned on the InterPlanetary File System (IPFS) returning a unique CID.
 
-The Chainlink EA uses the decryption key (k) to unwrap the encrypted work bundle (W) and obtain the original work package (w_p).
+To validate the key programmatically we need to create a simple proof with a checksum. The Proprietor can create a checksum (c) by keccak256 hashing w and k, packing the results into a single byte array with no padding, and hashing the result once more.
 
-The Chainlink EA then hashes the work package (w_p) using the SHA3-256 algorithm and returns the result (H(w_p)) to the smart contract.
+To keep the key from being exposed to the client prematurely, the Proprietor must use the public key on the Concordia contract to encode it (k_p).
 
-The smart contract compares the concord checksum (c) with the hashed work package (H(w_p)). If the two values match, the key is accepted, and the agreement is marked as "paid."
+Finally, the Proprietor can use k_p, c, and the cid to submit a transaction to create a "concord" on chain.
 
-The client can decrypt the encrypted work bundle (W) using the decryption key (k) and their wallet public key (p) to obtain the completed work (w).
+#### Payment
 
-This process ensures the protection of both parties, with payment released only when the work is completed as agreed upon. The integration with Chainlink allows the Concordia protocol to securely and reliably fetch and process off-chain data, further enhancing its functionality and security.
+Once the client pays the concord in full, the cid and k_p are passed to the oracle.
 
-**or as notation**
+The oracle decodes the k_p with the private key counterpart to the public key on the contract.
 
-1. W = E(k, w⊕p)
-2. Client ⟶ Payment ⟶ Contract
-3. Proprietor ⟶ k ⟶ Contract
-4. Contract ⟶ Chainlink EA ⟶ W (from IPFS)
-5. w_p = D(k, W)
-6. H(w_p) =? c
-7. If H(w_p) = c, mark Agreement as "paid"
-8. w = w_p⊕p
+The oracle uses k to decode w_k and obtain w.
+
+The oracle then hashes w with keccak256 (H(w)).
+
+The Oracle submits a transaction to return H(w) and k to the contract.
+
+The smart contract hashes k, packs its result with H(w) into a single byte array and hashes that using the keccak256 hash function. If the result matches c, the key is accepted, and the funds are withdrawable.
+
+#### Decrypting the Deliverable
+
+The client can decrypt the encrypted work bundle (w_k) using the decryption key (k) - and their wallet public key (p) if needed - to obtain the completed work (w).
+
+This process ensures the protection of both parties, with payment released only when the work is completed as agreed upon.
+
+#### As Notation
+
+1. w_k = AES_k(AES_pub(w))
+2. CID = pin w on IPFS
+3. c = keccak256(pack(keccak256(w), keccak256(k)))
+4. k_p = encode_pub_concordia(k)
+5. submitTransaction(k_p, c, CID)
+6. verifyPayment(CID, k_p)
+7. k = decode_priv(k_p)
+8. w = AES^-1_k(w_k)
+9. if (keccak256(pack(keccak256(k), keccak256(w))) == c) then accept k, allow withdrawal
+10. w = AES^-1_k(AES^-1_p(w_k))
 
 **where:**
 
-- W represents the encrypted work bundle
-- E is the encryption function
-- k is the decryption key
-- w is the work bundle
-- p is the client's wallet public key
-- ⊕ represents the XOR operation
-- D is the decryption function
-- w_p is the work package containing the original work and the client's public key
-- H is the SHA3-256 hash function
-- c is the concord checksum
+- w_k represents the encrypted deliverable
+- AES_k and AES_pub are the AES encryption functions with secret key and public key respectively
+- w is the deliverable
+- CID represents the unique Content Identifier returned from IPFS
+- keccak256 is the keccak256 hash function
+- pack represents the operation of packing results into a single byte array with no padding
+- k_p represents the encoded secret key
+- encode_pub_concordia and decode_priv are the encoding and decoding functions using the public key on the Concordia contract and its private counterpart respectively
+- AES^-1_k and AES^-1_p are the AES decryption functions with secret key and public key respectively
 
 ## Development
 
@@ -71,6 +88,8 @@ $ yarn --cwd sol npx hardhat operatorSetAuthorizedSenders --network sepolia
 ```
 
 #### Concordia
+
+**DEPRECATED AS OF 05/15/23**
 
 _The Concordia contract facilitates the creation, payment, approval, and updates of concords._
 

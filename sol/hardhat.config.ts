@@ -75,7 +75,7 @@ import "./tasks/concordia/read/get-concords-by-buyer";
 import "./tasks/concordia/read/get-concords-by-proposer";
 import "./tasks/concordia/write/create";
 import "./tasks/concordia/write/pay";
-import "./tasks/concordia/write/submit-key";
+import "./tasks/concordia/write/request-finalization";
 
 // operator
 import "./tasks/operator/write/set-authorized-senders";

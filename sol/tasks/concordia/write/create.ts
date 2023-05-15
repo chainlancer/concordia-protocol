@@ -35,10 +35,14 @@ task("create", "Create a concord")
     undefined,
     true
   )
+  .addParam(
+    "secretKey",
+    "Contract public key encrypted secret key for deliverable encryption"
+  )
   .setAction(async (args: any, hre: any) => {
     const signer = hre.ethers.provider.getSigner();
 
-    const { price, arbiter, cid, checksum, metadata } = args;
+    const { price, arbiter, cid, checksum, metadata, secretKey } = args;
     const buyer = args.buyer ?? (await signer.getAddress()); // default to signer address
 
     const { concordiaAddress } = config[hre.network.name];
@@ -49,22 +53,18 @@ task("create", "Create a concord")
       concordiaAddress
     );
 
-    // address payable _buyer,
-    // address payable _arbiter,
-    // uint96 _price,
-    // bytes32 _checksum,
-    // string memory _ipfsWorkCID,
-    // string memory _ipfsMetadataCID
-    const checksumData = ethers.utils.arrayify("0x" + checksum);
+    const checksumBytes = ethers.utils.arrayify("0x" + checksum);
+    const secretKeyBytes = ethers.utils.arrayify("0x" + secretKey);
     const tx = await contract
       .connect(signer)
       .create(
         buyer,
         arbiter,
         ethers.utils.parseEther(price),
-        checksumData,
+        checksumBytes,
         cid,
-        metadata
+        metadata,
+        secretKeyBytes
       );
     console.log("Transaction sent, waiting for it to be mined...");
 

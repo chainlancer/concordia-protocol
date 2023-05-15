@@ -1,6 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { RequestInput, ipfsDecryptAndValidate } from "./src/handlers";
+import { ipfsDecryptAndValidate } from "./src/handlers/ipfsDecryptAndValidate";
 
 const app = express();
 const port = process.env.EA_PORT || 8080;

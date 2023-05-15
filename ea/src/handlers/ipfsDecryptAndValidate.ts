@@ -4,16 +4,16 @@ import { ethers } from "ethers";
 import { aesDecrypt } from "../../../lib/src/aes";
 import { decryptWithPrivateKey } from "../../../lib/src/asymmetric";
 
-interface CustomParams {
-  decryption_key: string[];
-  ipfs_cid: string[];
-}
+// interface CustomParams {
+//   decryption_key: string[];
+//   ipfs_cid: string[];
+// }
 
 export interface RequestInput {
   id: string;
   data: {
-    decryption_key: string;
-    ipfs_cid: string;
+    deliverable_ipfs_cid: string;
+    secret_key: string;
   };
 }
 
@@ -22,10 +22,10 @@ const customError = (data: any): boolean => {
   return false;
 };
 
-const customParams: CustomParams = {
-  decryption_key: ["decryption_key"],
-  ipfs_cid: ["ipfs_cid"],
-};
+// const customParams: CustomParams = {
+//   decryption_key: ["decryption_key"],
+//   ipfs_cid: ["ipfs_cid"],
+// };
 
 // called by the chainlink node, fetches the data from ipfs, decrypts it, hashes it, and returns the hash
 export const ipfsDecryptAndValidate = async (
@@ -43,41 +43,27 @@ export const ipfsDecryptAndValidate = async (
     "0x2abeb8d87ce8cd0325068de54b448d4b492524028fd398445d0cf66cbfa3f5f6";
 
   const jobRunID = input.id;
-  const { ipfs_cid, decryption_key: encrypted_key } = input.data;
+  const { deliverable_ipfs_cid, secret_key } = input.data;
 
   // convert decryption_key from base64 to hex
-  let encryptedKeyHex = Buffer.from(encrypted_key, "base64").toString("hex");
+  let secretKeyHex = Buffer.from(secret_key, "base64").toString("hex");
 
   // TODO: revise this logic:
   // remove leading zeros. this is necessary because the chainlink node will add leading zeros to the decryption key.
   // note that this will break if the decryption key is prefixed with zeros
   //////////////////////////////////////////////////////////////
-  let index = 0;
-  while (
-    index < encryptedKeyHex.length &&
-    encryptedKeyHex.charAt(index) === "0"
-  ) {
-    index++;
-  }
-  encryptedKeyHex = "0" + encryptedKeyHex.substring(index);
+  // let index = 0;
+  // while (index < secretKeyHex.length && secretKeyHex.charAt(index) === "0") {
+  //   index++;
+  // }
+  // secretKeyHex = "0" + secretKeyHex.substring(index);
   //////////////////////////////////////////////////////////////
 
   // decrypt the key
-  const decryptedKey = await decryptWithPrivateKey(
-    concordiaPrivateKey,
-    encryptedKeyHex
-  );
-  console.log(
-    "encryptedKey:",
-    encrypted_key,
-    "encryptedKeyHex:",
-    encryptedKeyHex,
-    "decryptedKey:",
-    decryptedKey
-  );
+  const key = await decryptWithPrivateKey(concordiaPrivateKey, secretKeyHex);
 
   // fetch the data from ipfs
-  const url = `https://concordia.mypinata.cloud/ipfs/${ipfs_cid}`;
+  const url = `https://concordia.mypinata.cloud/ipfs/${deliverable_ipfs_cid}`;
   const params = {};
   const requestConfig = {
     url,
@@ -87,7 +73,6 @@ export const ipfsDecryptAndValidate = async (
   Requester.request(requestConfig, customError)
     .then((response: any) => {
       const { data } = response;
-      console.log("data: \n", data);
       if (!data) {
         // eslint-disable-next-line node/no-callback-literal
         callback(500, Requester.errored(jobRunID, `no data found at ${url}`));
@@ -95,11 +80,10 @@ export const ipfsDecryptAndValidate = async (
       }
 
       // attempt to decrypt with the hex representation of the decryption key. return 500 if it fails
-      let decryptedData = null;
+      let decryptedDeliverable = null;
       try {
-        console.log(data.trim(), decryptedKey);
-        decryptedData = aesDecrypt(data.trim(), decryptedKey);
-        console.log("decrypted: \n", decryptedData);
+        decryptedDeliverable = aesDecrypt(data.trim(), key);
+        console.log("decrypted: \n", decryptedDeliverable);
       } catch (error) {
         console.log("error: \n", error);
         // eslint-disable-next-line node/no-callback-literal
@@ -108,21 +92,21 @@ export const ipfsDecryptAndValidate = async (
       }
 
       // hash the decrypted data
-      const hash = encodeKeccak(decryptedData);
+      const hash = encodeKeccak(decryptedDeliverable);
 
       // convert the hash to bytes
       const hashBytes = ethers.utils.hexZeroPad("0x" + hash, 32);
-      console.log("hash as bytes:", hashBytes);
+      console.log("hash as bytes: \n", hashBytes);
 
-      const keyBytes = ethers.utils.hexZeroPad("0x" + decryptedKey, 32);
-      console.log("key as bytes:", keyBytes);
+      const keyBytes = ethers.utils.hexZeroPad("0x" + key, 32);
+      console.log("key as bytes:\n", keyBytes);
 
       // return the bytes
       const res = {
         data: {
           result: {
-            hash: hashBytes,
-            decryptedKey: keyBytes, // TODO
+            deliverableHash: hashBytes,
+            key: keyBytes, // TODO
           },
         },
         status: response.status,
@@ -136,32 +120,32 @@ export const ipfsDecryptAndValidate = async (
     });
 };
 
-export const gcpservice = (req: any, res: any): void => {
-  ipfsDecryptAndValidate(req.body, (statusCode, data) => {
-    res.status(statusCode).send(data);
-  });
-};
+// export const gcpservice = (req: any, res: any): void => {
+//   ipfsDecryptAndValidate(req.body, (statusCode, data) => {
+//     res.status(statusCode).send(data);
+//   });
+// };
 
-export const handler = (
-  event: any,
-  context: any,
-  callback: (error: any, data: any) => void
-): void => {
-  ipfsDecryptAndValidate(event, (statusCode, data) => {
-    callback(null, data);
-  });
-};
+// export const handler = (
+//   event: any,
+//   context: any,
+//   callback: (error: any, data: any) => void
+// ): void => {
+//   ipfsDecryptAndValidate(event, (statusCode, data) => {
+//     callback(null, data);
+//   });
+// };
 
-export const handlerv2 = (
-  event: any,
-  context: any,
-  callback: (error: any, response: any) => void
-): void => {
-  ipfsDecryptAndValidate(JSON.parse(event.body), (statusCode, data) => {
-    callback(null, {
-      statusCode: statusCode,
-      body: JSON.stringify(data),
-      isBase64Encoded: false,
-    });
-  });
-};
+// export const handlerv2 = (
+//   event: any,
+//   context: any,
+//   callback: (error: any, response: any) => void
+// ): void => {
+//   ipfsDecryptAndValidate(JSON.parse(event.body), (statusCode, data) => {
+//     callback(null, {
+//       statusCode: statusCode,
+//       body: JSON.stringify(data),
+//       isBase64Encoded: false,
+//     });
+//   });
+// };

@@ -32,13 +32,15 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         uint256 createdAt;
         uint256 updatedAt;
         uint96 price;
-        bytes32 checksum; // the hash of the hash of the deliverable and key
+        // h(h(deliverable), h(key)) - hashing the deliverable and key ensures that that the external adapter
+        // must have the correct values.
+        bytes32 checksum;
         address proposer;
         address buyer;
         address arbiter;
         bool arbiterApproved;
         bool paid;
-        bytes key;
+        bytes secretKey; // key encrypted with the public key of the contract
         string deliverableIpfsCID;
         string metadataIpfsCID;
     }
@@ -83,9 +85,8 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
 
     // TESTING
     event ExternalAdapterArgs(
-        bytes32 indexed hash,
-        bytes indexed key,
-        bytes32 indexed checksum
+        bytes32 indexed checksum,
+        bytes32 indexed challenge_checksum
     );
 
     constructor(
@@ -155,7 +156,8 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         uint96 _price,
         bytes32 _checksum,
         string memory _ipfsWorkCID,
-        string memory _ipfsMetadataCID
+        string memory _ipfsMetadataCID,
+        bytes memory _secretKey
     ) public {
         concordCount++;
 
@@ -168,7 +170,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
             arbiterApproved: _arbiter == address(0),
             deliverableIpfsCID: _ipfsWorkCID,
             metadataIpfsCID: _ipfsMetadataCID,
-            key: "",
+            secretKey: _secretKey, // key to decrypt the deliverable, encrypted with public key of contract
             paid: false,
             createdAt: block.timestamp,
             updatedAt: block.timestamp
@@ -182,6 +184,8 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         emit Created(concordCount, msg.sender);
     }
 
+    // TODO
+    // function pay(bool _finalize)
     function pay(uint256 _id) public payable {
         Concord storage c = concords[_id];
 
@@ -204,57 +208,55 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         emit Approved(_id, msg.sender);
     }
 
-    function submitKey(uint256 _id, bytes memory _encryptedKey) public {
+    // anyone can finalize the concord once conditions are met
+    function requestFinalization(uint256 _id) public {
         Concord storage c = concords[_id];
 
-        require(
-            msg.sender == c.proposer,
-            "Only the proposer can update the key"
+        require(c.paid, "Client has not paid");
+        require(c.arbiterApproved, "Arbiter has not approved");
+
+        Chainlink.Request memory req = buildOperatorRequest(
+            stringToBytes32(chainlinkJob),
+            this.fulfillFinalization.selector
         );
 
-        bytes32 requestId = _submitKey(c.deliverableIpfsCID, _encryptedKey);
+        req.add("deliverable_ipfs_cid", c.deliverableIpfsCID);
+        req.addBytes("secret_key", c.secretKey);
+
+        bytes32 requestId = sendChainlinkRequestTo(oracle, req, chainlinkFee);
 
         requestIdToConcordId[requestId] = _id;
     }
 
-    function _submitKey(
-        string memory _ipfsCID,
-        bytes memory _encryptedKey
-    ) private returns (bytes32 requestId) {
-        Chainlink.Request memory req = buildOperatorRequest(
-            stringToBytes32(chainlinkJob),
-            this.fulfillSubmitKey.selector
-        );
-
-        req.add("ipfs_cid", _ipfsCID);
-        req.addBytes("decryption_key", _encryptedKey); // TODO
-
-        requestId = sendChainlinkRequestTo(oracle, req, chainlinkFee);
-    }
-
-    function fulfillSubmitKey(
+    function fulfillFinalization(
         bytes32 _requestId,
-        bytes32 _hash,
-        bytes memory _decryptedKey
+        bytes32 _deliverableHash,
+        bytes memory _key
     ) public recordChainlinkFulfillment(_requestId) {
         uint256 id = requestIdToConcordId[_requestId];
         Concord storage c = concords[id];
 
-        bytes32 checksum = keccak256(abi.encodePacked(_hash, _decryptedKey));
-        emit ExternalAdapterArgs(_hash, _decryptedKey, checksum);
+        bytes32 keyHash = keccak256(_key);
+        bytes32 checksum = keccak256(
+            abi.encodePacked(_deliverableHash, keyHash)
+        );
+
+        emit ExternalAdapterArgs(c.checksum, checksum);
+
         if (checksum != c.checksum) {
-            emit KeyUpdated(id, _decryptedKey, false);
+            emit KeyUpdated(id, _key, false);
             return;
         }
 
-        c.key = _decryptedKey;
+        c.secretKey = _key;
         c.updatedAt = block.timestamp;
 
         delete requestIdToConcordId[_requestId];
 
-        emit KeyUpdated(id, c.key, true);
+        emit KeyUpdated(id, c.secretKey, true);
     }
 
+    // TODO: implement a way to lock funds
     function withdrawFunds(uint256 _id) public {
         Concord storage c = concords[_id];
 
