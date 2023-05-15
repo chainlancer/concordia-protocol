@@ -248,7 +248,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
             return;
         }
 
-        c.secretKey = _key;
+        // c.secretKey = _key; // TODO
         c.updatedAt = block.timestamp;
 
         delete requestIdToConcordId[_requestId];
