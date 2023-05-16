@@ -41,6 +41,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         bool arbiterApproved;
         bool paid;
         bytes secretKey; // key encrypted with the public key of the contract
+        bytes decryptionKey;
         string deliverableIpfsCID;
         string metadataIpfsCID;
     }
@@ -171,6 +172,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
             deliverableIpfsCID: _ipfsWorkCID,
             metadataIpfsCID: _ipfsMetadataCID,
             secretKey: _secretKey, // key to decrypt the deliverable, encrypted with public key of contract
+            decryptionKey: "",
             paid: false,
             createdAt: block.timestamp,
             updatedAt: block.timestamp
@@ -248,7 +250,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
             return;
         }
 
-        // c.secretKey = _key; // TODO
+        c.decryptionKey = _key;
         c.updatedAt = block.timestamp;
 
         delete requestIdToConcordId[_requestId];

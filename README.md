@@ -95,19 +95,19 @@ _The Concordia contract facilitates the creation, payment, approval, and updates
 
 ```bash
 # deploy concordia contract
-$ yarn --cwd sol npx hardhat scripts/concordia/deploy.ts --network sepolia
+$ yarn sol deploy-concordia
 
 # create concord
-$ yarn --cwd sol npx hardhat concordiaNew --cid IPFS_CID --checksum CHECKSUM --network sepolia
+$ yarn sol hardhat create --cid DELIVERABLE_IPFS_CID --checksum CHECKSUM --secret-key ENCRYPTED_SECRET_KEY$ yarn sol hardhat create --cid DELIVERABLE_IPFS_CID --checksum CHECKSUM --secret-key ENCRYPTED_SECRET_KEY
 
 # pay for concord
-$ yarn --cwd sol npx hardhat concordiaPay --id WORK_AGREEMENT_ID --network sepolia
+$ yarn sol pay --id CONCORD_ID
 
-# update decryption key for concord
-$ yarn --cwd sol npx hardhat concordiaSubmitKey --network sepolia
+# request finalization
+$ yarn sol request-finalization --id CONCORD_ID
 
 # get concord by id
-$ yarn --cwd sol npx hardhat concordiaById --id WORK_AGREEMENT_ID --network sepolia
+$ yarn sol get-concord-by-id --id CONCORD_ID
 ```
 
 **try this demo**
@@ -115,68 +115,78 @@ $ yarn --cwd sol npx hardhat concordiaById --id WORK_AGREEMENT_ID --network sepo
 first, deploy a fresh contract:
 
 ```bash
-$ yarn --cwd sol npx hardhat run scripts/concordia/deploy.ts --network sepolia
+$ yarn sol deploy-concordia
 ```
 
 then update the .env with the new contract address.
 
-let's assume that our content is simply, "Hello World!" and we're using a 16-byte key, "207109403456bdad4a9711d9f40aebff"
+let's assume that our deliverable (w) is simply, "Hello World!" and we're using a 16-byte key (k), "207109403456bdad4a9711d9f40aebff"
 
-create a checksum our content, "Hello World!" with the SHA3_256 algorithm:
-> checksum: d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af
+create a checksum for our deliverable, keccak256(encodePacked(keccak256(w), keccak256(k)))
+> packed: ed6c11b0b5b808960df26f5bfc471d04c1995b0ffd2055925ad1be28d6baadfd0ae45eb4d1bd2f37f1bbfc80f948d33c126fb78b894c7afa4af0b15e226e155a
+> checksum: 781114df28046b62aff59bb46bab2d5ad1eb4a8171ac4407a083737a998796a3
 
-use AES encoding to encode your content with our key, "207109403456bdad4a9711d9f40aebff"
+using asym encryption, encrypt k with public key on contract
+> encrypted key: 8e4640c39847bf441cab0871cea163a40318c8ce6f3f636bd7cf095d1ced2b66a5ab9a8f3e644b4b9281c839f89cf97a38e73362d60e545980a213614b7290f37df4884413f0d62d8dd59e0f1ca94b34aea8add876d51d74db8752d208107f6956bac11c76da635577782777d7f607c2fc4ef9281a0be46c4c154bd54d85630fa0
+
+use AES encryption to encrypt w with k to get w_k, "207109403456bdad4a9711d9f40aebff"
 > encrypted content: d87e3eed86bfed5ffae1784705cdc845c4438e97707077cb4897e605cd917012
 
 pin encrypted content on IPFS and get CID
-> CID: QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq
+> CID: QmaWqJtRuZcXKdzY1DRfAGLarPDvmjUJDVZ5zeyjeMWKR3
 
 okay now we can create a concord. note that default buyer is concord creator and default price is 0
 
 ```bash
-$ yarn --cwd sol npx hardhat concordiaNew --cid QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq --checksum d0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af --network sepolia
-```
+$ yarn sol hardhat create --cid QmaWqJtRuZcXKdzY1DRfAGLarPDvmjUJDVZ5zeyjeMWKR3 \ 
+    --checksum 781114df28046b62aff59bb46bab2d5ad1eb4a8171ac4407a083737a998796a3 \
+    --secret-key 8e4640c39847bf441cab0871cea163a40318c8ce6f3f636bd7cf095d1ced2b66a5ab9a8f3e644b4b9281c839f89cf97a38e73362d60e545980a213614b7290f37df4884413f0d62d8dd59e0f1ca94b34aea8add876d51d74db8752d208107f6956bac11c76da635577782777d7f607c2fc4ef9281a0be46c4c154bd54d85630fa0```
 > concord id: 1
 
 next, we can pay for our concord
 
 ```bash
-$ yarn --cwd sol npx hardhat concordiaPay --id 1 --network sepolia
+$ yarn sol hardhat pay --id 1
 ```
 
-now that the agreement is paid we can pass in our decryption key to withdraw the funds. note that the default price
-was 0 so there will be no funds in the agreement
+now that client has paid we can finalize the agreement to unlock the funds
 
 ```bash
-$ yarn --cwd sol npx hardhat concordiaSubmitKey --id 1 --key 207109403456bdad4a9711d9f40aebff --network sepolia
+$ yarn sol hardhat request-finalization --id 1
 ```
 
 get concord
 
 ```bash
-$ yarn --cwd sol npx hardhat concordiaById --id 1 --network sepolia
+$ yarn sol hardhat get-concord-by-id --id 1
 ```
-> concord: [
-    '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
-    BigNumber { value: "0" },
-    '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
-    '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
-    '0x0000000000000000000000000000000000000000',
-    true,
-    true,
-    '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
-    'QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq',
-    checksum: '0xd0e47486bbf4c16acac26f8b653592973c1362909f90262877089f9c8a4536af',
-    price: BigNumber { value: "0" },
-    proprietor: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
-    client: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
-    verifier: '0x0000000000000000000000000000000000000000',
-    paid: true,
-    verifierApproved: true,
-    decryptionKey: '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
-    ipfsCID: 'QmUq9f7XoCyJDrkXJjgcNAKkqaTs3iqAr31cuug639oYdq'
+> 
+res: [
+  BigNumber { value: "1684159128" },
+  BigNumber { value: "1684159224" },
+  BigNumber { value: "0" },
+  '0x781114df28046b62aff59bb46bab2d5ad1eb4a8171ac4407a083737a998796a3',
+  '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+  '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+  '0x0000000000000000000000000000000000000000',
+  true,
+  true,
+  '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
+  'QmaWqJtRuZcXKdzY1DRfAGLarPDvmjUJDVZ5zeyjeMWKR3',
+  'QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi',
+  createdAt: BigNumber { value: "1684159128" },
+  updatedAt: BigNumber { value: "1684159224" },
+  price: BigNumber { value: "0" },
+  checksum: '0x781114df28046b62aff59bb46bab2d5ad1eb4a8171ac4407a083737a998796a3',
+  proposer: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+  buyer: '0x744e054a911A89938B0f88043e14bE48A0f8BEc9',
+  arbiter: '0x0000000000000000000000000000000000000000',
+  arbiterApproved: true,
+  paid: true,
+  secretKey: '0x00000000000000000000000000000000207109403456bdad4a9711d9f40aebff',
+  deliverableIpfsCID: 'QmaWqJtRuZcXKdzY1DRfAGLarPDvmjUJDVZ5zeyjeMWKR3',
+  metadataIpfsCID: 'QmPbxeGcXhYQQNgsC6a36dDyYUcHgMLnGKnF8pVFmGsvqi'
 ]
-
 fetch the content from IPFS and decrypt using the decryption key
 
 ```bash
