@@ -10,6 +10,13 @@ import { getDeployedContract } from "../../../src/utils";
 import config from "../../../../config";
 import { ethers } from "ethers";
 
+const getPublicKeyFromAddress = async (
+  ethereumAddress: string
+): Promise<string> => {
+  const publicKey = ethers.utils.computePublicKey(ethereumAddress);
+  return publicKey;
+};
+
 task("create", "Create a concord")
   .addParam("buyer", "Buyer address", undefined, undefined, true)
   .addParam("arbiter", "Arbiter address", DEFAULT_ARBITER, undefined, true)
@@ -55,6 +62,9 @@ task("create", "Create a concord")
 
     const checksumBytes = ethers.utils.arrayify("0x" + checksum);
     const secretKeyBytes = ethers.utils.arrayify("0x" + secretKey);
+
+    const arbiterKeyBytes = ethers.utils.arrayify("0x" + secretKey);
+
     const tx = await contract
       .connect(signer)
       .create(
@@ -64,7 +74,8 @@ task("create", "Create a concord")
         checksumBytes,
         cid,
         metadata,
-        secretKeyBytes
+        secretKeyBytes,
+        arbiterKeyBytes
       );
     console.log("Transaction sent, waiting for it to be mined...");
 

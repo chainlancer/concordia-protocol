@@ -17,7 +17,12 @@ spec:
       initContainers:
         - name: init
           image: busybox:latest
-          command: ['sh', '-c', 'echo "rrossilli55@gmail.com" > /chainlink/.api; echo "AyloLucy5901!!!!" >> /chainlink/.api ; echo "AyloLucy5901!!!!" > /chainlink/.password']
+          command:
+            [
+              "sh",
+              "-c",
+              'echo "rrossilli55@gmail.com" > /chainlink/.api; echo "AyloLucy5901!!!!" >> /chainlink/.api ; echo "AyloLucy5901!!!!" > /chainlink/.password',
+            ]
           envFrom:
             - secretRef:
                 name: chainlink-secrets
@@ -28,7 +33,15 @@ spec:
         - name: clr-ea-node
           image: smartcontract/chainlink:1.13.0-root
           command:
-            ["chainlink","local", "n", "-p", "/chainlink/.password", "-a",  "/chainlink/.api"]
+            [
+              "chainlink",
+              "local",
+              "n",
+              "-p",
+              "/chainlink/.password",
+              "-a",
+              "/chainlink/.api",
+            ]
           env:
             - name: LOG_LEVEL
               value: debug
@@ -48,6 +61,10 @@ spec:
               value: "false"
             - name: ALLOW_ORIGINS
               value: "*"
+            - name: SKIP_DATABASE_PASSWORD_COMPLEXITY_CHECK
+              value: "true"
+            - name: P2P_PEER_ID
+              value: "12D3KooWRGfwRL5RTDXwxNuuxxXCmjGYaDteJij5d3yJBdeziVPb"
           ports:
             - containerPort: 6688
           volumeMounts:

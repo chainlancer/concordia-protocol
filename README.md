@@ -140,7 +140,8 @@ okay now we can create a concord. note that default buyer is concord creator and
 ```bash
 $ yarn sol hardhat create --cid QmaWqJtRuZcXKdzY1DRfAGLarPDvmjUJDVZ5zeyjeMWKR3 \ 
     --checksum 781114df28046b62aff59bb46bab2d5ad1eb4a8171ac4407a083737a998796a3 \
-    --secret-key 8e4640c39847bf441cab0871cea163a40318c8ce6f3f636bd7cf095d1ced2b66a5ab9a8f3e644b4b9281c839f89cf97a38e73362d60e545980a213614b7290f37df4884413f0d62d8dd59e0f1ca94b34aea8add876d51d74db8752d208107f6956bac11c76da635577782777d7f607c2fc4ef9281a0be46c4c154bd54d85630fa0```
+    --secret-key 8e4640c39847bf441cab0871cea163a40318c8ce6f3f636bd7cf095d1ced2b66a5ab9a8f3e644b4b9281c839f89cf97a38e73362d60e545980a213614b7290f37df4884413f0d62d8dd59e0f1ca94b34aea8add876d51d74db8752d208107f6956bac11c76da635577782777d7f607c2fc4ef9281a0be46c4c154bd54d85630fa0
+```
 > concord id: 1
 
 next, we can pay for our concord
