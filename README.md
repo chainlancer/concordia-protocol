@@ -1,5 +1,5 @@
 # Concordia Solidity Contracts
-Concordia is a decentralized protocol leveraging blockchain technology to enable trustless atomic swaps of digital work.
+Concordia is a decentralized protocol leveraging blockchain technology to enable trustless atomic swaps of digital assets.
 
 ## Overview
 
