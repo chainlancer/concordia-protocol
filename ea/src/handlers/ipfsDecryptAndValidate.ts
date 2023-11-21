@@ -3,6 +3,7 @@ import { encodeKeccak } from "../../../lib/src/keccak";
 import { ethers } from "ethers";
 import { aesDecrypt } from "../../../lib/src/aes";
 import { decryptWithPrivateKey } from "../../../lib/src/asymmetric";
+import fs from "fs";
 
 // interface CustomParams {
 //   decryption_key: string[];
@@ -46,7 +47,7 @@ export const ipfsDecryptAndValidate = async (
   const { deliverable_ipfs_cid, secret_key } = input.data;
 
   // convert decryption_key from base64 to hex
-  let secretKeyHex = Buffer.from(secret_key, "base64").toString("hex");
+  const secretKeyHex = Buffer.from(secret_key, "base64").toString("hex");
 
   // TODO: revise this logic:
   // remove leading zeros. this is necessary because the chainlink node will add leading zeros to the decryption key.
@@ -71,19 +72,39 @@ export const ipfsDecryptAndValidate = async (
   };
 
   Requester.request(requestConfig, customError)
-    .then((response: any) => {
-      const { data } = response;
-      if (!data) {
+    .then(async (response: any) => {
+      const ipfsResponse: any = response?.data?.toString();
+      console.log(typeof response);
+      if (!ipfsResponse) {
         // eslint-disable-next-line node/no-callback-literal
         callback(500, Requester.errored(jobRunID, `no data found at ${url}`));
         return;
       }
 
+      // Try to convert to a string
+      let encryptedDeliverable;
+      // try {
+      //   encryptedDeliverable = Buffer.from(ipfsResponse).toString("utf-8");
+      //   // do something with the string data...
+      // } catch (err) {
+      //   // handle error, if any
+      //   console.error(err);
+      //   callback(
+      //     500,
+      //     Requester.errored(jobRunID, `error converting to string, ${err}`)
+      //   );
+      //   return;
+      // }
+      console.log("encrypted deliverable", encryptedDeliverable);
+
       // attempt to decrypt with the hex representation of the decryption key. return 500 if it fails
-      let decryptedDeliverable = null;
+      let decryptedDeliverable: any;
       try {
-        decryptedDeliverable = aesDecrypt(data.trim(), key);
-        console.log("decrypted: \n", decryptedDeliverable);
+        decryptedDeliverable = aesDecrypt(ipfsResponse, key);
+        console.log("-----------------------------");
+        console.log(JSON.stringify(decryptedDeliverable, null, 4));
+        console.log("-----------------------------");
+        // console.log("decrypted deliverable: \n", decryptedDeliverable);
       } catch (error) {
         console.log("error: \n", error);
         // eslint-disable-next-line node/no-callback-literal
@@ -102,7 +123,7 @@ export const ipfsDecryptAndValidate = async (
       console.log("key as bytes:\n", keyBytes);
 
       // return the bytes
-      const res = {
+      const toReturn = {
         data: {
           result: {
             deliverableHash: hashBytes,
@@ -111,7 +132,7 @@ export const ipfsDecryptAndValidate = async (
         },
         status: response.status,
       };
-      callback(response.status, Requester.success(jobRunID, res));
+      callback(response.status, Requester.success(jobRunID, toReturn));
     })
     .catch((error: any) => {
       console.log(error);

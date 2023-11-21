@@ -1,10 +1,10 @@
 type = "directrequest"
 schemaVersion = 1
 externalJobID = "a82b2222-ffdb-4479-a6f4-c930ae7c8e0d"
-name = "clr-ipfs-decrypt-and-validate-v0.0.3"
+name = "clr-ipfs-decrypt-and-validate-v0.0.4"
 forwardingAllowed = false
 maxTaskDuration = "0s"
-contractAddress = "0x3Eb267a7aDDAD23ba0DB19Ed212506C275C53B81"
+contractAddress = "0x3e8549C96301d5292039d60D1F8c1a9e1ceD9558"
 minContractPaymentLinkJuels = "0"
 observationSource = """
     decode_log   [type=ethabidecodelog
@@ -19,7 +19,7 @@ observationSource = """
     encode_tx    [type=ethabiencode
                   abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"]
-    submit_tx    [type=ethtx to="0x3Eb267a7aDDAD23ba0DB19Ed212506C275C53B81" data="$(encode_tx)"]
+    submit_tx    [type=ethtx to="0x3e8549C96301d5292039d60D1F8c1a9e1ceD9558" data="$(encode_tx)"]
 
     decode_log -> decode_cbor -> fetch -> parse -> encode_data -> encode_tx -> submit_tx
 """

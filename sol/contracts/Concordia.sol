@@ -4,26 +4,25 @@ pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
-/// TODO:
-/// "work" should be renamed to "deliverable" or something similar
-///
-/// known exploits:
-/// after the proposer submits the key there's a short window that the buyer can withdraw their funds and simply not pay
-/// - one solution to this is to lock the funds until the key is verified; however, in the instance that there is an
-///   issue with the external adapter, the funds would be locked forever. we could add a timeout to the lock, but then
-///   the buyer could simply wait until the timeout is reached and withdraw their funds.
-///      - potential solution, in addition to the lock and timeout, we add a public key to the contract that
-///        should be used to encrypt decryption keys. the external adapter could then decrypt the key and generate a hash
-///        of the decrypted deliverable. then it would pass both the hash and the key to the contract - unlocking the funds
-///        only if the hash matches the one stored in the contract. the external adapter doesn't really expose anything if
-///        it is compromised. they would need to know the private key of the buyer to decrypt the deliverable
-///
-/// deploy a cluster of contracts to make it more secure?
+// TODO:
+// implement fund lock funds while contract is being fulfilled
+// implement concord cancellation
+// implement concord expiration
+// implement buyer refund
 
-/// with this refactor, we can simply encrypt the key with the public key of the contract as well as the deliverable
+// todo: we should remove arbiterApproved and instead use a status enum... concords should default to PendingApproval
+// and then the arbiter can approve or reject the concord. if there is no arbiter, then the concord is automatically
+// approved
 
 contract Concordia is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
+
+    enum Status {
+        Unpaid,
+        Paid,
+        Fulfilled,
+        FundsWithdrawn
+    }
 
     // TODO:
     // createdAt and updatedAt can probably use a type smaller than uint256
@@ -31,23 +30,30 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
     struct Concord {
         uint256 createdAt;
         uint256 updatedAt;
-        uint96 price;
-        // h(h(deliverable), h(key)) - hashing the deliverable and key ensures that that the external adapter
-        // must have the correct values.
         bytes32 checksum;
         address proposer;
         address buyer;
         address arbiter;
+        uint96 price;
+        Status status;
         bool arbiterApproved;
-        bool paid;
-        bytes secretKey; // key encrypted with the public key of the contract
+        bytes secretKey; // encoded with contract pub key
         bytes decryptionKey;
+        bytes arbiterSecretKey; // encoded with arbiter pub key
         string deliverableIpfsCID;
         string metadataIpfsCID;
     }
 
     mapping(uint256 => Concord) public concords;
     uint256 public concordCount;
+
+    mapping(address => uint256[]) private _arbiterConcordIds;
+
+    function arbiterConcordIds(
+        address addr
+    ) public view returns (uint256[] memory) {
+        return _arbiterConcordIds[addr];
+    }
 
     mapping(address => uint256[]) private _proposerConcordIds;
 
@@ -77,7 +83,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
     event Created(uint256 indexed concordId, address indexed proposer);
     event Paid(uint256 indexed concordId, address indexed buyer);
     event Approved(uint256 indexed concordId, address indexed arbiter);
-    event KeyUpdated(
+    event Fulfilled(
         uint256 indexed concordId,
         bytes decryptionKey,
         bool success
@@ -122,23 +128,6 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         }
     }
 
-    function contractBalances()
-        public
-        view
-        returns (uint256 eth, uint256 link)
-    {
-        eth = address(this).balance;
-
-        LinkTokenInterface linkContract = LinkTokenInterface(
-            chainlinkTokenAddress()
-        );
-        link = linkContract.balanceOf(address(this));
-    }
-
-    function getChainlinkToken() public view returns (address) {
-        return chainlinkTokenAddress();
-    }
-
     function withdrawLink() public onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
         require(
@@ -158,7 +147,8 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         bytes32 _checksum,
         string memory _ipfsWorkCID,
         string memory _ipfsMetadataCID,
-        bytes memory _secretKey
+        bytes memory _secretKey,
+        bytes memory _arbiterSecretKey
     ) public {
         concordCount++;
 
@@ -169,34 +159,41 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
             checksum: _checksum,
             price: _price,
             arbiterApproved: _arbiter == address(0),
+            status: Status.Unpaid,
             deliverableIpfsCID: _ipfsWorkCID,
             metadataIpfsCID: _ipfsMetadataCID,
-            secretKey: _secretKey, // key to decrypt the deliverable, encrypted with public key of contract
+            secretKey: _secretKey,
             decryptionKey: "",
-            paid: false,
+            arbiterSecretKey: _arbiterSecretKey,
             createdAt: block.timestamp,
             updatedAt: block.timestamp
         });
         concords[concordCount] = wa;
 
-        // Add work c ID to the respective proposer and buyer mappings
+        // add to mappings
         _proposerConcordIds[msg.sender].push(concordCount);
         _buyerConcordIds[_buyer].push(concordCount);
+        if (_arbiter != address(0)) {
+            _arbiterConcordIds[_arbiter].push(concordCount);
+        }
 
         emit Created(concordCount, msg.sender);
     }
 
-    // TODO
-    // function pay(bool _finalize)
-    function pay(uint256 _id) public payable {
+    function pay(uint256 _id, bool shouldFinalize) public payable {
         Concord storage c = concords[_id];
 
+        require(c.status == Status.Unpaid, "Already paid");
         require(msg.value == c.price, "Incorrect payment amount");
 
-        c.paid = true;
+        c.status = Status.Paid;
         c.updatedAt = block.timestamp; // Update the updatedAt field
 
         emit Paid(_id, msg.sender);
+
+        if (shouldFinalize) {
+            requestFinalization(_id);
+        }
     }
 
     function approve(uint256 _id) public {
@@ -214,7 +211,7 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
     function requestFinalization(uint256 _id) public {
         Concord storage c = concords[_id];
 
-        require(c.paid, "Client has not paid");
+        require(c.status == Status.Paid, "Must pay first");
         require(c.arbiterApproved, "Arbiter has not approved");
 
         Chainlink.Request memory req = buildOperatorRequest(
@@ -246,16 +243,17 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
         emit ExternalAdapterArgs(c.checksum, checksum);
 
         if (checksum != c.checksum) {
-            emit KeyUpdated(id, _key, false);
+            emit Fulfilled(id, _key, false);
             return;
         }
 
         c.decryptionKey = _key;
         c.updatedAt = block.timestamp;
+        c.status = Status.Fulfilled;
 
         delete requestIdToConcordId[_requestId];
 
-        emit KeyUpdated(id, c.secretKey, true);
+        emit Fulfilled(id, c.secretKey, true);
     }
 
     // TODO: implement a way to lock funds
@@ -266,13 +264,14 @@ contract Concordia is ChainlinkClient, ConfirmedOwner {
             msg.sender == c.proposer,
             "Only the proposer can withdraw funds"
         );
-        require(c.paid, "Client has not paid");
+        require(c.status == Status.Fulfilled, "Concord is not Fulfilled");
         require(c.arbiterApproved, "Arbiter has not approved");
 
         uint256 amount = c.price;
 
         c.price = 0;
         c.updatedAt = block.timestamp;
+        c.status = Status.FundsWithdrawn;
 
         payable(c.proposer).transfer(amount);
 

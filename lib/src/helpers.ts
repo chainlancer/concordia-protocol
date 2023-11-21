@@ -15,3 +15,8 @@ export function encodePacked(...values: any[]) {
   }
   return packedData;
 }
+
+export function padKey(key: string): string {
+  // each byte is represented by 2 hexadecimal characters, so 32 bytes are 64 characters
+  return key.padStart(64, "0");
+}

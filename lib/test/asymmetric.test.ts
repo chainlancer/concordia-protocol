@@ -7,7 +7,7 @@ const INPUT = "Hello World!";
 describe("Asymmetric", () => {
   it("encrypt and decrypt asymmetric key pair", async () => {
     const identity = EthCrypto.createIdentity();
-    // console.log(identity);
+    console.log(identity);
 
     const encrypted = await EthCrypto.encryptWithPublicKey(
       identity.publicKey,
